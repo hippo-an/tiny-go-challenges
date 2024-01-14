@@ -1,7 +1,8 @@
 # Tiny Go Challenges
+## References
+1. [Gophercises](https://courses.calhoun.io/courses/cor_gophercises)
+2. [Coding Challenges](https://codingchallenges.fyi/challenges/intro)
 
 ## The Goal
-I've experienced a lot of trial and error while learning programming through books. 
-Personally, the most effective method for learning programming was creating tiny challenging projects to simultaneously grasp concepts and usage.
-In applying this approach to learning a new language like Go, the goal of this project is to enhance understanding of the Go language by creating various small projects.
-
+Personally, an effective way to learn programming is to learn concepts and usage simultaneously by creating small and challenging projects.
+The goal of this project is to create a variety of small projects in Golang to improve conceptual understanding and learn how to effectively use it.
