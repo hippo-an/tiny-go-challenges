@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"net/http"
@@ -41,15 +42,33 @@ func MapHandler(pathsToUrls map[string]string, fallback http.Handler) http.Handl
 // See MapHandler to create a similar http.HandlerFunc via
 // a mapping of paths to urls.
 func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
-	urls, err := parseYml(yml)
+	redirects, err := parseYml(yml)
 	if err != nil {
 		return nil, err
 	}
-	pathsToUrls := buildMap(urls)
+	pathsToUrls := buildMap(redirects)
 	return MapHandler(pathsToUrls, fallback), nil
 }
 
-func buildMap(pathUrls []pathUrl) map[string]string {
+func JSONHandler(jsonBytes []byte, fallback http.Handler) (http.HandlerFunc, error) {
+	redirects, err := parseJson(jsonBytes)
+	if err != nil {
+		return nil, err
+	}
+	pathsToUrls := buildMap(redirects)
+	return MapHandler(pathsToUrls, fallback), nil
+}
+
+func parseJson(jsonBytes []byte) ([]Redirect, error) {
+	var pathUrls []Redirect
+	err := json.Unmarshal(jsonBytes, &pathUrls)
+	if err != nil {
+		return nil, err
+	}
+	return pathUrls, nil
+}
+
+func buildMap(pathUrls []Redirect) map[string]string {
 	pathsToUrls := make(map[string]string)
 	for _, pu := range pathUrls {
 		pathsToUrls[pu.Path] = pu.URL
@@ -57,8 +76,8 @@ func buildMap(pathUrls []pathUrl) map[string]string {
 	return pathsToUrls
 }
 
-func parseYml(data []byte) ([]pathUrl, error) {
-	var pathUrls []pathUrl
+func parseYml(data []byte) ([]Redirect, error) {
+	var pathUrls []Redirect
 	err := yaml.Unmarshal(data, &pathUrls)
 	if err != nil {
 		return nil, err
@@ -66,7 +85,7 @@ func parseYml(data []byte) ([]pathUrl, error) {
 	return pathUrls, nil
 }
 
-type pathUrl struct {
-	Path string `yaml:"path"`
-	URL  string `yaml:"url"`
+type Redirect struct {
+	Path string `yaml:"path" json:"path"`
+	URL  string `yaml:"url" json:"url"`
 }
