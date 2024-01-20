@@ -9,31 +9,24 @@ import (
 	"strings"
 )
 
-type AdventureHandler struct {
-	story *models.Story
-}
-
-var pathHtml string
-
 func init() {
 	templateBytes, err := os.ReadFile("./adventure_04/web/template.gohtml")
 	if err != nil {
 		log.Fatal("error while read index html file; ", err)
 	}
+	tmpl = template.Must(template.New("").Parse(string(templateBytes)))
+}
 
-	pathHtml = string(templateBytes)
+type AdventureHandler struct {
+	story    *models.Story
+	tmpl     *template.Template
+	pathFunc func(r *http.Request) string
 }
 
 func (h AdventureHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	path := strings.TrimSpace(r.URL.Path)
-	if path == "" || path == "/" {
-		path = "/intro"
-	}
-
-	tmpl := template.Must(template.New(path).Parse(pathHtml))
+	path := h.pathFunc(r)
 	story := *h.story
-
-	if chapter, ok := story[path[1:]]; ok {
+	if chapter, ok := story[path]; ok {
 		err := tmpl.Execute(w, chapter)
 		if err != nil {
 			log.Printf("%v\n", err)
@@ -43,11 +36,43 @@ func (h AdventureHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	} else {
 		http.Error(w, "Chapter not found.", http.StatusNotFound)
 	}
-
 }
 
-func NewHandler(s *models.Story) AdventureHandler {
-	return AdventureHandler{
-		story: s,
+type HandlerOption func(h *AdventureHandler)
+
+var tmpl *template.Template
+
+func defaultPathFn(r *http.Request) string {
+	path := strings.TrimSpace(r.URL.Path)
+	if path == "" || path == "/" {
+		path = "/intro"
+	}
+
+	return path[1:]
+}
+
+func NewHandler(s *models.Story, opts ...HandlerOption) AdventureHandler {
+	handler := AdventureHandler{
+		story:    s,
+		tmpl:     tmpl,
+		pathFunc: defaultPathFn,
+	}
+
+	for _, opt := range opts {
+		opt(&handler)
+	}
+
+	return handler
+}
+
+func WithTemplate(t *template.Template) HandlerOption {
+	return func(h *AdventureHandler) {
+		h.tmpl = t
+	}
+}
+
+func WithPathFunc(fn func(r *http.Request) string) HandlerOption {
+	return func(h *AdventureHandler) {
+		h.pathFunc = fn
 	}
 }
