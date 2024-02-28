@@ -1,15 +1,18 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"net/url"
+	"sort"
 	"strings"
-	"sync"
 	"time"
+
+	"github.com/dev-hippo-an/tiny-go-challenges/qhn_05/client"
 )
 
 func main() {
@@ -29,42 +32,11 @@ func main() {
 func handler(numStories int, tpl *template.Template) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		var client Client
-		ids, err := client.TopItems()
+		stories, err := getTopStories(numStories)
 		if err != nil {
-			http.Error(w, "Failed to load top stories", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		var stories []item
-		itemChan := make(chan *item, numStories)
-		wg := sync.WaitGroup{}
-
-		for _, id := range ids {
-			wg.Add(1)
-
-			go func() {
-				defer wg.Done()
-
-				hnItem, err := client.GetItem(id)
-				if err != nil {
-					itemChan <- nil
-				}
-
-				item := parseHNItem(hnItem)
-				itemChan <- &item
-			}()
-
-			item := <-itemChan
-
-			if item != nil && isStoryLink(*item) {
-				stories = append(stories, *item)
-				if len(stories) >= numStories {
-					break
-				}
-			}
-		}
-
-		wg.Wait()
 
 		data := templateData{
 			Stories: stories,
@@ -78,11 +50,69 @@ func handler(numStories int, tpl *template.Template) http.HandlerFunc {
 	})
 }
 
+func getTopStories(numStories int) ([]item, error) {
+	var client client.Client
+	ids, err := client.TopItems()
+	if err != nil {
+		return nil, errors.New("failed to load top stories")
+	}
+
+	type result struct {
+		idx  int
+		item item
+		err  error
+	}
+
+	resultCh := make(chan result)
+
+	for idx, id := range ids {
+
+		go func(idx, id int) {
+			hnItem, err := client.GetItem(id)
+			if err != nil {
+				resultCh <- result{idx: idx, err: err}
+			}
+
+			resultCh <- result{idx: idx, item: parseHNItem(hnItem)}
+		}(idx, id)
+	}
+
+	var results []result
+
+	for range ids {
+		results = append(results, <-resultCh)
+	}
+
+	close(resultCh)
+
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].idx < results[j].idx
+	})
+
+	var stories []item
+
+	for _, res := range results {
+		if res.err != nil {
+			continue
+		}
+
+		if isStoryLink(res.item) {
+			if len(stories) >= numStories {
+				break
+			}
+
+			stories = append(stories, res.item)
+		}
+	}
+
+	return stories, nil
+}
+
 func isStoryLink(item item) bool {
 	return item.Type == "story" && item.URL != ""
 }
 
-func parseHNItem(hnItem Item) item {
+func parseHNItem(hnItem client.Item) item {
 	ret := item{Item: hnItem}
 	url, err := url.Parse(ret.URL)
 	if err == nil {
@@ -93,7 +123,7 @@ func parseHNItem(hnItem Item) item {
 
 // item is the same as the hn.Item, but adds the Host field
 type item struct {
-	Item
+	client.Item
 	Host string
 }
 
