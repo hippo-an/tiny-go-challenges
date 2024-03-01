@@ -17,6 +17,7 @@ import (
 
 func main() {
 	var port, numStories int
+
 	flag.IntVar(&port, "port", 3001, "the port to start web server on")
 	flag.IntVar(&numStories, "num_stories", 30, "the number of top stories to display")
 
@@ -30,7 +31,7 @@ func main() {
 }
 
 func handler(numStories int, tpl *template.Template) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		stories, err := getTopStories(numStories)
 		if err != nil {
@@ -47,16 +48,10 @@ func handler(numStories int, tpl *template.Template) http.HandlerFunc {
 			http.Error(w, "Failed to process the template", http.StatusInternalServerError)
 			return
 		}
-	})
+	}
 }
 
-func getTopStories(numStories int) ([]item, error) {
-	var client client.Client
-	ids, err := client.TopItems()
-	if err != nil {
-		return nil, errors.New("failed to load top stories")
-	}
-
+func getStories(ids []int) []item {
 	type result struct {
 		idx  int
 		item item
@@ -66,9 +61,9 @@ func getTopStories(numStories int) ([]item, error) {
 	resultCh := make(chan result)
 
 	for idx, id := range ids {
-
 		go func(idx, id int) {
-			hnItem, err := client.GetItem(id)
+			var c client.Client
+			hnItem, err := c.GetItem(id)
 			if err != nil {
 				resultCh <- result{idx: idx, err: err}
 			}
@@ -91,18 +86,47 @@ func getTopStories(numStories int) ([]item, error) {
 
 	var stories []item
 
-	for _, res := range results {
-		if res.err != nil {
+	for i := 0; i < len(ids); i++ {
+		if results[i].err != nil {
 			continue
 		}
 
-		if isStoryLink(res.item) {
-			if len(stories) >= numStories {
-				break
-			}
-
-			stories = append(stories, res.item)
+		if isStoryLink(results[i].item) {
+			stories = append(stories, results[i].item)
 		}
+	}
+
+	return stories
+}
+
+func getTopStories(numStories int) ([]item, error) {
+	var c client.Client
+	ids, err := c.TopItems()
+	if err != nil {
+		return nil, errors.New("failed to load top stories")
+	}
+
+	var stories []item
+	from := 0
+	idsLength := len(ids)
+
+	for i := 0; i < 5; i++ {
+		need := numStories - len(stories)
+		to := from + need
+
+		if to > idsLength {
+			to = idsLength
+		}
+
+		stories = append(stories, getStories(ids[from:to])...)
+		from = to
+		if len(stories) > numStories || from >= idsLength {
+			break
+		}
+	}
+
+	if len(stories) >= numStories {
+		return stories[:numStories], nil
 	}
 
 	return stories, nil
@@ -114,9 +138,9 @@ func isStoryLink(item item) bool {
 
 func parseHNItem(hnItem client.Item) item {
 	ret := item{Item: hnItem}
-	url, err := url.Parse(ret.URL)
+	fullUrl, err := url.Parse(ret.URL)
 	if err == nil {
-		ret.Host = strings.TrimPrefix(url.Hostname(), "www.")
+		ret.Host = strings.TrimPrefix(fullUrl.Hostname(), "www.")
 	}
 	return ret
 }
