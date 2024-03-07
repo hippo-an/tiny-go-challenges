@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"strconv"
-
+	"github.com/dev-hippo-an/tiny-go-challenges/task_cli_07/db"
 	"github.com/spf13/cobra"
+	"os"
+	"strconv"
 )
 
 var doCmd = &cobra.Command{
@@ -22,7 +23,34 @@ var doCmd = &cobra.Command{
 			ids = append(ids, id)
 		}
 
-		fmt.Println(ids)
+		if len(ids) == 0 {
+			fmt.Println("pass the id of the list")
+			return
+		}
+
+		for _, id := range ids {
+			err := db.DeleteTask(int64(id))
+			if err != nil {
+				fmt.Println("Failed to do:", id)
+				continue
+			}
+		}
+
+		tasks, err := db.AllTasks()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		if len(tasks) == 0 {
+			fmt.Println("You have no tasks to complete! Take a vacation 🚀")
+			return
+		}
+
+		fmt.Println("You have the following tasks: ")
+		for i, v := range tasks {
+			fmt.Printf("%d. %s(%d)\n", i+1, v.Task, v.Id)
+		}
 	},
 }
 
