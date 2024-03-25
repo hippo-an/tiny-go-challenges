@@ -83,6 +83,7 @@ func GenerateTemplateCache() (map[string]*template.Template, error) {
 	return fullTemplateCache, nil
 }
 
+// archived code =========================================
 var cachedTemplate = make(map[string]*template.Template)
 
 func TemplateTestSimple(w http.ResponseWriter, t string) {
