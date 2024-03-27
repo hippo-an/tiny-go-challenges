@@ -15,8 +15,10 @@ func route(app *config.AppConfig) http.Handler {
 	r.Use(CSRFMiddleware)
 	r.Use(SessionLoad)
 
-	r.HandleFunc("/", handlers.Repo.Home).Methods("GET")
-	r.HandleFunc("/about", handlers.Repo.About).Methods("GET")
+	_ = r.HandleFunc("/", handlers.Repo.Home).Methods("GET")
+	_ = r.HandleFunc("/about", handlers.Repo.About).Methods("GET")
 
+	fileServer := http.FileServer(http.Dir("./static/"))
+	_ = r.PathPrefix("/").Handler(http.StripPrefix("/static", fileServer))
 	return r
 }
