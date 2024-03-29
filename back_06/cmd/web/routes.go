@@ -17,6 +17,9 @@ func route(app *config.AppConfig) http.Handler {
 
 	_ = r.HandleFunc("/", handlers.Repo.Home).Methods("GET")
 	_ = r.HandleFunc("/about", handlers.Repo.About).Methods("GET")
+	_ = r.HandleFunc("/generals-quarters", handlers.Repo.Generals).Methods("GET")
+	_ = r.HandleFunc("/majors-suite", handlers.Repo.Majors).Methods("GET")
+	_ = r.HandleFunc("/search-availability", handlers.Repo.Availability).Methods("GET")
 
 	fileServer := http.FileServer(http.Dir("./static/"))
 	_ = r.PathPrefix("/").Handler(http.StripPrefix("/static", fileServer))

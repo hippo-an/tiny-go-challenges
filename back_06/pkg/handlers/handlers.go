@@ -38,3 +38,19 @@ func (re *Repository) About(w http.ResponseWriter, r *http.Request) {
 	log.Println(remoteIp)
 	render.Template(w, "about.page.tmpl", &models.TemplateData{})
 }
+
+func (re *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, "make-reservation.page.tmpl", &models.TemplateData{})
+}
+
+func (re *Repository) Generals(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, "generals.page.tmpl", &models.TemplateData{})
+}
+
+func (re *Repository) Majors(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, "majors.page.tmpl", &models.TemplateData{})
+}
+
+func (re *Repository) Availability(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, "search-availability.page.tmpl", &models.TemplateData{})
+}
