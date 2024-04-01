@@ -4,11 +4,19 @@ import (
 	"github.com/justinas/nosurf"
 	"log"
 	"net/http"
+	"strings"
 )
+
+var whiteList = []string{"/static/**", "/favicon.ico"}
 
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println(r.RequestURI)
+		if r.URL.Path == "/favicon.ico" || strings.HasPrefix(r.URL.Path, "/static/") {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		log.Printf("[%s] %s\n", r.Method, r.RequestURI)
 		next.ServeHTTP(w, r)
 	})
 }

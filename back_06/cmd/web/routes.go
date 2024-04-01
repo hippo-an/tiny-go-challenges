@@ -20,6 +20,9 @@ func route(app *config.AppConfig) http.Handler {
 	_ = r.HandleFunc("/generals-quarters", handlers.Repo.Generals).Methods("GET")
 	_ = r.HandleFunc("/majors-suite", handlers.Repo.Majors).Methods("GET")
 	_ = r.HandleFunc("/search-availability", handlers.Repo.Availability).Methods("GET")
+	_ = r.HandleFunc("/search-availability", handlers.Repo.PostAvailability).Methods("POST")
+	_ = r.HandleFunc("/contact", handlers.Repo.Contact).Methods("GET")
+	_ = r.HandleFunc("/make-reservation", handlers.Repo.Reservation).Methods("GET")
 
 	fileServer := http.FileServer(http.Dir("./static/"))
 	_ = r.PathPrefix("/").Handler(http.StripPrefix("/static", fileServer))
