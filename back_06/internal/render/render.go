@@ -3,8 +3,8 @@ package render
 import (
 	"bytes"
 	"fmt"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/pkg/config"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/pkg/models"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
 	"github.com/justinas/nosurf"
 	"html/template"
 	"log"

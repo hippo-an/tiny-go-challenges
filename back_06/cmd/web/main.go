@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"github.com/alexedwards/scs/v2"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/pkg/config"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/pkg/handlers"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/pkg/render"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/handlers"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/render"
 	"log"
 	"net/http"
 	"os"

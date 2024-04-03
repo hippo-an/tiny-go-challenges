@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/pkg/config"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/pkg/models"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/pkg/render"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/forms"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/render"
 	"log"
 	"net/http"
 )
@@ -28,6 +29,11 @@ func NewHandlers(r *Repository) {
 	Repo = r
 }
 
+type jsonResponse struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message"`
+}
+
 func (re *Repository) Home(w http.ResponseWriter, r *http.Request) {
 	remoteIp := r.RemoteAddr
 	re.App.Session.Put(r.Context(), "remote_ip", remoteIp)
@@ -41,7 +47,41 @@ func (re *Repository) About(w http.ResponseWriter, r *http.Request) {
 }
 
 func (re *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
-	render.Template(w, r, "make-reservation.page.tmpl", &models.TemplateData{})
+	data := make(map[string]interface{})
+	data["reservation"] = models.Reservation{}
+
+	render.Template(w, r, "make-reservation.page.tmpl", &models.TemplateData{
+		Form: forms.New(nil),
+		Data: data,
+	})
+}
+
+func (re *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	reservation := models.Reservation{
+		FirstName: r.Form.Get("first_name"),
+		LastName:  r.Form.Get("last_name"),
+		Email:     r.Form.Get("email"),
+		Phone:     r.Form.Get("phone"),
+	}
+
+	form := forms.New(r.PostForm)
+	if valid := form.Has("first_name", r); !valid {
+
+		data := make(map[string]interface{})
+		data["reservation"] = reservation
+
+		render.Template(w, r, "make-reservation.page.tmpl", &models.TemplateData{
+			Form: form,
+			Data: data,
+		})
+		return
+	}
 }
 
 func (re *Repository) Generals(w http.ResponseWriter, r *http.Request) {
@@ -61,6 +101,10 @@ func (re *Repository) PostAvailability(w http.ResponseWriter, r *http.Request) {
 	endDate := r.Form.Get("end-date")
 
 	fmt.Fprintln(w, startDate, endDate)
+}
+
+func (re *Repository) AvailabilityJson(w http.ResponseWriter, r *http.Request) {
+
 }
 
 func (re *Repository) Contact(w http.ResponseWriter, r *http.Request) {
