@@ -26,6 +26,7 @@ func route(app *config.AppConfig) http.Handler {
 
 	_ = r.HandleFunc("/contact", handlers.Repo.Contact).Methods("GET")
 	_ = r.HandleFunc("/make-reservation", handlers.Repo.Reservation).Methods("GET")
+	_ = r.HandleFunc("/reservation-summary", handlers.Repo.ReservationSummary).Methods("GET")
 	_ = r.HandleFunc("/make-reservation", handlers.Repo.PostReservation).
 		Methods("POST").
 		Headers("Content-Type", "application/x-www-form-urlencoded")

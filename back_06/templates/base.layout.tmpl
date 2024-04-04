@@ -55,7 +55,6 @@
     {{end}}
 
 
-
     <div class="row my-footer">
         <div class="col">
 
@@ -102,8 +101,6 @@
         })();
 
 
-
-
         function notify(type, msg) {
             notie.alert({
                 type: type,
@@ -131,6 +128,17 @@
             });
         }
 
+        {{with .Error}}
+            notify("error", "{{.}}")
+        {{end}}
+
+        {{with .Warning}}
+            notify("warning", "{{.}}")
+        {{end}}
+
+        {{with .Flash}}
+            notify("flash", "{{.}}")
+        {{end}}
 
         function Prompt() {
             const toast = function (c) {

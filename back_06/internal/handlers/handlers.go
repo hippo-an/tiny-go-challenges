@@ -56,6 +56,27 @@ func (re *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (re *Repository) ReservationSummary(w http.ResponseWriter, r *http.Request) {
+
+	reservation, ok := re.App.Session.Get(r.Context(), "reservation").(models.Reservation)
+
+	if !ok {
+		log.Println("cannot get item from session")
+		re.App.Session.Put(r.Context(), "error", "reservation is not correctly set")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	re.App.Session.Remove(r.Context(), "reservation")
+
+	data := make(map[string]interface{})
+	data["reservation"] = reservation
+
+	render.Template(w, r, "reservation-summary.page.tmpl", &models.TemplateData{
+		Data: data,
+	})
+}
+
 func (re *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 
@@ -71,8 +92,10 @@ func (re *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	form := forms.New(r.PostForm)
-	if valid := form.Has("first_name", r); !valid {
 
+	form.Required("first_name", "last_name", "email", "phone")
+
+	if !form.Valid() {
 		data := make(map[string]interface{})
 		data["reservation"] = reservation
 
@@ -82,6 +105,10 @@ func (re *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+
+	re.App.Session.Put(r.Context(), "reservation", reservation)
+
+	http.Redirect(w, r, "/reservation-summary", http.StatusSeeOther)
 }
 
 func (re *Repository) Generals(w http.ResponseWriter, r *http.Request) {

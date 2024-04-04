@@ -1,7 +1,6 @@
 package forms
 
 import (
-	"net/http"
 	"net/url"
 )
 
@@ -17,12 +16,19 @@ func New(data url.Values) *Form {
 	}
 }
 
-func (f *Form) Has(field string, r *http.Request) bool {
-	x := f.Values.Get(field)
+func (f *Form) Valid() bool {
+	return len(f.Errors) == 0
+}
+
+func (f *Form) Required(fields ...string) {
+	for _, field := range fields {
+		f.has(field)
+	}
+}
+
+func (f *Form) has(field string) {
+	x := f.Get(field)
 	if x == "" {
 		f.Errors.Add(field, "This field cannot be blank")
-		return false
 	}
-
-	return true
 }
