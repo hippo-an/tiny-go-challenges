@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"encoding/gob"
 	"github.com/alexedwards/scs/v2"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/pkg/config"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/pkg/handlers"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/pkg/render"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/handlers"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/render"
 	"log"
 	"net/http"
 	"os"
@@ -22,6 +24,8 @@ var (
 
 // main is main application function
 func main() {
+	gob.Register(models.Reservation{})
+
 	app.InProduction = false
 
 	tc, err := render.GenerateTemplateCache()

@@ -1,0 +1,62 @@
+{{template "base" .}}
+
+{{define "content"}}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                <img src="/static/images/majors-suite.png" class="img-fluid img-thumbnail">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <h1 class="text-center mt-4">
+                    Major's Suite
+                </h1>
+                <p>
+                    Your home away form home, set on the majestic waters of the atlantic Ocean, this will be a vacation to
+                    remember.
+                    Your home away form home, set on the majestic waters of the atlantic Ocean, this will be a vacation to
+                    remember.
+                    Your home away form home, set on the majestic waters of the atlantic Ocean, this will be a vacation to
+                    remember.
+                    Your home away form home, set on the majestic waters of the atlantic Ocean, this will be a vacation to
+                    remember.
+                    Your home away form home, set on the majestic waters of the atlantic Ocean, this will be a vacation to
+                    remember.
+                    Your home away form home, set on the majestic waters of the atlantic Ocean, this will be a vacation to
+                    remember.
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col text-center">
+                <a id="check-availability" href="#!" onclick="checkAvailability()" class="btn btn-success">Check Availability</a>
+            </div>
+        </div>
+    </div>
+{{end}}
+
+
+
+{{define "js"}}
+    <script>
+        function checkAvailability() {
+            const h = `
+            <form id="check-availability-form-modal" action="" method="" class="row needs-validation" novalidate>
+                <div id="reservation-dates-modal" class="form-group col-10">
+                    <div class="form-group row">
+                        <div class="form-group col">
+                            <input disabled required type="text" class="form-control" id="start-modal" name="start-modal" placeholder="Arrival">
+                        </div>
+                        <div class="form-group col">
+                            <input disabled required class="form-control" type="text" id="end-modal" name="end-modal" placeholder="Departure">
+                        </div>
+                    </div>
+                </div>
+            </form>
+        `;
+
+            attention.custom({msg: h, title: "choose your date!"});
+        }
+    </script>
+{{end}}

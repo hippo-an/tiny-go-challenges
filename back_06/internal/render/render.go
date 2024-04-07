@@ -3,8 +3,9 @@ package render
 import (
 	"bytes"
 	"fmt"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/pkg/config"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/pkg/models"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
+	"github.com/justinas/nosurf"
 	"html/template"
 	"log"
 	"net/http"
@@ -17,11 +18,15 @@ func NewTemplate(conf *config.AppConfig) {
 	app = conf
 }
 
-func AddDefaultData(td *models.TemplateData) *models.TemplateData {
+func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateData {
+	td.CSRFToken = nosurf.Token(r)
+	td.Flash = app.Session.PopString(r.Context(), "flash")
+	td.Warning = app.Session.PopString(r.Context(), "warning")
+	td.Error = app.Session.PopString(r.Context(), "error")
 	return td
 }
 
-func Template(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
+func Template(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) {
 	var templateCache map[string]*template.Template
 
 	if app.UseCache {
@@ -37,7 +42,7 @@ func Template(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
 
 	buf := new(bytes.Buffer)
 
-	td = AddDefaultData(td)
+	td = AddDefaultData(td, r)
 
 	err := t.Execute(buf, td)
 	if err != nil {
