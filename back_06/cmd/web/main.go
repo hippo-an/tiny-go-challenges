@@ -24,29 +24,12 @@ var (
 
 // main is main application function
 func main() {
-	gob.Register(models.Reservation{})
 
-	app.InProduction = false
+	err := run()
 
-	tc, err := render.GenerateTemplateCache()
 	if err != nil {
-		log.Fatal("cannot create template cache")
+		log.Fatal(err)
 	}
-	app.TemplateCache = tc
-	app.UseCache = app.InProduction
-
-	session = scs.New()
-	session.Lifetime = 24 * time.Hour
-	session.Cookie.Persist = true
-	session.Cookie.SameSite = http.SameSiteLaxMode
-	session.Cookie.Secure = app.InProduction
-
-	app.Session = session
-
-	repo := handlers.NewRepo(&app)
-	handlers.NewHandlers(repo)
-	render.NewTemplate(&app)
-
 	svr := http.Server{
 		Handler:      route(&app),
 		Addr:         portNumber,
@@ -81,4 +64,31 @@ func main() {
 	// to finalize based on context cancellation.
 	log.Println("shutting down....")
 	os.Exit(0)
+}
+
+func run() error {
+	gob.Register(models.Reservation{})
+
+	app.InProduction = false
+
+	tc, err := render.GenerateTemplateCache()
+	if err != nil {
+		log.Fatal("cannot create template cache")
+	}
+	app.TemplateCache = tc
+	app.UseCache = app.InProduction
+
+	session = scs.New()
+	session.Lifetime = 24 * time.Hour
+	session.Cookie.Persist = true
+	session.Cookie.SameSite = http.SameSiteLaxMode
+	session.Cookie.Secure = app.InProduction
+
+	app.Session = session
+
+	repo := handlers.NewRepo(&app)
+	handlers.NewHandlers(repo)
+	render.NewTemplate(&app)
+
+	return nil
 }

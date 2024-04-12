@@ -2,6 +2,7 @@ package render
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
@@ -13,6 +14,8 @@ import (
 )
 
 var app *config.AppConfig
+
+var pathToTemplates = "./templates"
 
 func NewTemplate(conf *config.AppConfig) {
 	app = conf
@@ -26,7 +29,7 @@ func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateDa
 	return td
 }
 
-func Template(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) {
+func Template(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) error {
 	var templateCache map[string]*template.Template
 
 	if app.UseCache {
@@ -37,7 +40,7 @@ func Template(w http.ResponseWriter, r *http.Request, tmpl string, td *models.Te
 
 	t, ok := templateCache[tmpl]
 	if !ok {
-		log.Fatal("can not find t")
+		return errors.New("can't get template from cache")
 	}
 
 	buf := new(bytes.Buffer)
@@ -46,23 +49,25 @@ func Template(w http.ResponseWriter, r *http.Request, tmpl string, td *models.Te
 
 	err := t.Execute(buf, td)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
 
 	_, err = buf.WriteTo(w)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
+
+	return nil
 }
 
 func GenerateTemplateCache() (map[string]*template.Template, error) {
 	fullTemplateCache := map[string]*template.Template{}
-	pages, err := filepath.Glob("./templates/*.page.tmpl")
+	pages, err := filepath.Glob(fmt.Sprintf("%s/*.page.tmpl", pathToTemplates))
 	if err != nil {
 		return fullTemplateCache, err
 	}
 
-	layouts, err := filepath.Glob("./templates/*.layout.tmpl")
+	layouts, err := filepath.Glob(fmt.Sprintf("%s/*.layout.tmpl", pathToTemplates))
 	if err != nil {
 		return fullTemplateCache, err
 	}
@@ -75,7 +80,7 @@ func GenerateTemplateCache() (map[string]*template.Template, error) {
 		}
 
 		if len(layouts) > 0 {
-			associatedTemplateWithLayout, err := createdTemplate.ParseGlob("./templates/*.layout.tmpl")
+			associatedTemplateWithLayout, err := createdTemplate.ParseGlob(fmt.Sprintf("%s/*.layout.tmpl", pathToTemplates))
 			if err != nil {
 				return fullTemplateCache, err
 			}
