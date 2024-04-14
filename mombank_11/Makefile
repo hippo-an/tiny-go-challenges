@@ -18,9 +18,12 @@ dropdb:
 	docker exec -it postgres16 dropdb mom_bank
 
 migrateup:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/mom_bank?sslmode=disable" -verbose up
+	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/mom_bank?sslmode=disable" -verbose up 1
 
 migratedown:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/mom_bank?sslmode=disable" -verbose down
+	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/mom_bank?sslmode=disable" -verbose down 1
 
-.PHONY: rundb stopdb createdb dropdb migrateup migratedown
+sqlc:
+	sqlc generate
+
+.PHONY: rundb stopdb createdb dropdb migrateup migratedown sqlc
