@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/forms"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/helpers"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/render"
-	"log"
 	"net/http"
 )
 
@@ -35,14 +35,10 @@ type jsonResponse struct {
 }
 
 func (re *Repository) Home(w http.ResponseWriter, r *http.Request) {
-	remoteIp := r.RemoteAddr
-	re.App.Session.Put(r.Context(), "remote_ip", remoteIp)
 	render.Template(w, r, "home.page.tmpl", &models.TemplateData{})
 }
 
 func (re *Repository) About(w http.ResponseWriter, r *http.Request) {
-	remoteIp := re.App.Session.GetString(r.Context(), "remote_ip")
-	log.Println(remoteIp)
 	render.Template(w, r, "about.page.tmpl", &models.TemplateData{})
 }
 
@@ -61,7 +57,7 @@ func (re *Repository) ReservationSummary(w http.ResponseWriter, r *http.Request)
 	reservation, ok := re.App.Session.Get(r.Context(), "reservation").(models.Reservation)
 
 	if !ok {
-		log.Println("cannot get item from session")
+		re.App.ErrorLog.Println("cannot get item from session")
 		re.App.Session.Put(r.Context(), "error", "reservation is not correctly set")
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
@@ -81,7 +77,7 @@ func (re *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 
 	if err != nil {
-		log.Println(err)
+		helpers.ServerError(w, err)
 		return
 	}
 	reservation := models.Reservation{

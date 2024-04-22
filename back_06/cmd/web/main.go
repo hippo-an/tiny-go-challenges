@@ -71,6 +71,15 @@ func run() error {
 
 	app.InProduction = false
 
+	var infoLog *log.Logger
+	var errorLog *log.Logger
+
+	infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errorLog = log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
+	app.InfoLog = infoLog
+	app.ErrorLog = errorLog
+
 	tc, err := render.GenerateTemplateCache()
 	if err != nil {
 		log.Fatal("cannot create template cache")

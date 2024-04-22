@@ -62,13 +62,6 @@ var theTests = []struct {
 	},
 }
 
-//_ = r.HandleFunc("/search-availability", Repo.PostAvailability).Methods("POST")
-//_ = r.HandleFunc("/search-availability-json", Repo.AvailabilityJson).Methods("POST")
-//
-//_ = r.HandleFunc("/make-reservation", Repo.PostReservation).
-//Methods("POST").
-//Headers("Content-Type", "application/x-www-form-urlencoded")
-
 func TestHandlers(t *testing.T) {
 	routes := getRoutes()
 	ts := httptest.NewTLSServer(routes)
