@@ -1,17 +1,17 @@
 package main
 
 import (
-	"context"
 	"encoding/gob"
 	"github.com/alexedwards/scs/v2"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/driver"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/handlers"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/render"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/repository"
 	"log"
 	"net/http"
 	"os"
-	"os/signal"
 	"time"
 )
 
@@ -24,12 +24,24 @@ var (
 
 // main is main application function
 func main() {
-
-	err := run()
+	err := setupAppConfig()
 
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// db settings ==========================================
+	db, err := driver.ConnectSQL("postgres", "postgresql://root:secret@localhost:15432/booking?sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.SQL.Close()
+
+	repo := repository.NewPostgresRepository(db)
+
+	cfg := config.NewConfig(&app, repo)
+	handlers.NewHandlers(cfg)
+
 	svr := http.Server{
 		Handler:      route(&app),
 		Addr:         portNumber,
@@ -38,39 +50,23 @@ func main() {
 		IdleTimeout:  time.Second * 30,
 	}
 
-	go func() {
-		log.Println("server starting on port", portNumber)
-		if err := svr.ListenAndServe(); err != nil {
-			log.Println(err)
-		}
-	}()
-
-	c := make(chan os.Signal, 1)
-	// We'll accept graceful shutdowns when quit via SIGINT (Ctrl+C)
-	// SIGKILL, SIGQUIT or SIGTERM (Ctrl+/) will not be caught.
-	signal.Notify(c, os.Interrupt)
-
-	// Block until we receive our signal.
-	<-c
-
-	// Create a deadline to wait for.
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-	// Doesn't block if no connections, but will otherwise wait
-	// until the timeout deadline.
-	svr.Shutdown(ctx)
-	// Optionally, you could run srv.Shutdown in a goroutine and block on
-	// <-ctx.Done() if your application should wait for other services
-	// to finalize based on context cancellation.
-	log.Println("shutting down....")
-	os.Exit(0)
+	log.Println("server starting on port", portNumber)
+	if err := svr.ListenAndServe(); err != nil {
+		log.Fatal(err)
+	}
 }
 
-func run() error {
+func setupAppConfig() error {
+	// encode GOB
+	gob.Register(models.User{})
 	gob.Register(models.Reservation{})
+	gob.Register(models.Room{})
+	gob.Register(models.Restriction{})
 
+	// production mode settings =============================
 	app.InProduction = false
 
+	// logger settings ======================================
 	var infoLog *log.Logger
 	var errorLog *log.Logger
 
@@ -80,6 +76,7 @@ func run() error {
 	app.InfoLog = infoLog
 	app.ErrorLog = errorLog
 
+	// go template settings =================================
 	tc, err := render.GenerateTemplateCache()
 	if err != nil {
 		log.Fatal("cannot create template cache")
@@ -87,6 +84,7 @@ func run() error {
 	app.TemplateCache = tc
 	app.UseCache = app.InProduction
 
+	// session settings =====================================
 	session = scs.New()
 	session.Lifetime = 24 * time.Hour
 	session.Cookie.Persist = true
@@ -95,9 +93,7 @@ func run() error {
 
 	app.Session = session
 
-	repo := handlers.NewRepo(&app)
-	handlers.NewHandlers(repo)
-	render.NewTemplate(&app)
+	render.NewRenderer(&app)
 
 	return nil
 }

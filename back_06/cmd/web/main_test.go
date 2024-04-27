@@ -3,9 +3,9 @@ package main
 import "testing"
 
 func TestRun(t *testing.T) {
-	err := run()
+	err := setupAppConfig()
 
 	if err != nil {
-		t.Error("failed run()")
+		t.Error("failed setupAppConfig()")
 	}
 }

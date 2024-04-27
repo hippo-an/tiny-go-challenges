@@ -15,19 +15,19 @@ func route(app *config.AppConfig) http.Handler {
 	r.Use(CSRFMiddleware)
 	r.Use(SessionLoad)
 
-	_ = r.HandleFunc("/", handlers.Repo.Home).Methods("GET")
-	_ = r.HandleFunc("/about", handlers.Repo.About).Methods("GET")
-	_ = r.HandleFunc("/generals-quarters", handlers.Repo.Generals).Methods("GET")
-	_ = r.HandleFunc("/majors-suite", handlers.Repo.Majors).Methods("GET")
+	_ = r.HandleFunc("/", handlers.Home).Methods("GET")
+	_ = r.HandleFunc("/about", handlers.About).Methods("GET")
+	_ = r.HandleFunc("/generals-quarters", handlers.Generals).Methods("GET")
+	_ = r.HandleFunc("/majors-suite", handlers.Majors).Methods("GET")
 
-	_ = r.HandleFunc("/search-availability", handlers.Repo.Availability).Methods("GET")
-	_ = r.HandleFunc("/search-availability", handlers.Repo.PostAvailability).Methods("POST")
-	_ = r.HandleFunc("/search-availability-json", handlers.Repo.AvailabilityJson).Methods("POST")
+	_ = r.HandleFunc("/search-availability", handlers.Availability).Methods("GET")
+	_ = r.HandleFunc("/search-availability", handlers.PostAvailability).Methods("POST")
+	_ = r.HandleFunc("/search-availability-json", handlers.AvailabilityJson).Methods("POST")
 
-	_ = r.HandleFunc("/contact", handlers.Repo.Contact).Methods("GET")
-	_ = r.HandleFunc("/make-reservation", handlers.Repo.Reservation).Methods("GET")
-	_ = r.HandleFunc("/reservation-summary", handlers.Repo.ReservationSummary).Methods("GET")
-	_ = r.HandleFunc("/make-reservation", handlers.Repo.PostReservation).
+	_ = r.HandleFunc("/contact", handlers.Contact).Methods("GET")
+	_ = r.HandleFunc("/make-reservation", handlers.Reservation).Methods("GET")
+	_ = r.HandleFunc("/reservation-summary", handlers.ReservationSummary).Methods("GET")
+	_ = r.HandleFunc("/make-reservation", handlers.PostReservation).
 		Methods("POST").
 		Headers("Content-Type", "application/x-www-form-urlencoded")
 

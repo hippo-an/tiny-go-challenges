@@ -17,8 +17,8 @@ var app *config.AppConfig
 
 var pathToTemplates = "./templates"
 
-func NewTemplate(conf *config.AppConfig) {
-	app = conf
+func NewRenderer(c *config.AppConfig) {
+	app = c
 }
 
 func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateData {

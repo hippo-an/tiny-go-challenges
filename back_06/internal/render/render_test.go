@@ -47,7 +47,7 @@ func TestTemplate(t *testing.T) {
 }
 
 func TestNewTemplates(t *testing.T) {
-	NewTemplate(app)
+	NewRenderer(app)
 }
 
 func TestGenerateTemplateCache(t *testing.T) {

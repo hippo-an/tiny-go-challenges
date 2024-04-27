@@ -46,28 +46,28 @@ func getRoutes() http.Handler {
 
 	app.Session = session
 
-	repo := NewRepo(&app)
+	repo := config.NewConfig(&app)
 	NewHandlers(repo)
-	render.NewTemplate(&app)
+	render.NewRenderer(&app)
 
 	r := mux.NewRouter()
 
 	r.Use(LoggingMiddleware)
 	r.Use(SessionLoad)
 
-	_ = r.HandleFunc("/", Repo.Home).Methods("GET")
-	_ = r.HandleFunc("/about", Repo.About).Methods("GET")
-	_ = r.HandleFunc("/generals-quarters", Repo.Generals).Methods("GET")
-	_ = r.HandleFunc("/majors-suite", Repo.Majors).Methods("GET")
+	_ = r.HandleFunc("/", Home).Methods("GET")
+	_ = r.HandleFunc("/about", About).Methods("GET")
+	_ = r.HandleFunc("/generals-quarters", Generals).Methods("GET")
+	_ = r.HandleFunc("/majors-suite", Majors).Methods("GET")
 
-	_ = r.HandleFunc("/search-availability", Repo.Availability).Methods("GET")
-	_ = r.HandleFunc("/search-availability", Repo.PostAvailability).Methods("POST")
-	_ = r.HandleFunc("/search-availability-json", Repo.AvailabilityJson).Methods("POST")
+	_ = r.HandleFunc("/search-availability", Availability).Methods("GET")
+	_ = r.HandleFunc("/search-availability", PostAvailability).Methods("POST")
+	_ = r.HandleFunc("/search-availability-json", AvailabilityJson).Methods("POST")
 
-	_ = r.HandleFunc("/contact", Repo.Contact).Methods("GET")
-	_ = r.HandleFunc("/make-reservation", Repo.Reservation).Methods("GET")
-	_ = r.HandleFunc("/reservation-summary", Repo.ReservationSummary).Methods("GET")
-	_ = r.HandleFunc("/make-reservation", Repo.PostReservation).
+	_ = r.HandleFunc("/contact", Contact).Methods("GET")
+	_ = r.HandleFunc("/make-reservation", Reservation).Methods("GET")
+	_ = r.HandleFunc("/reservation-summary", ReservationSummary).Methods("GET")
+	_ = r.HandleFunc("/make-reservation", PostReservation).
 		Methods("POST").
 		Headers("Content-Type", "application/x-www-form-urlencoded")
 
