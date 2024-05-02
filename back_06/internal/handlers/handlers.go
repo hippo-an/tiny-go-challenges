@@ -1,12 +1,13 @@
 package handlers
 
 import (
-	"fmt"
+	"errors"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/forms"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/helpers"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/render"
+	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
 	"time"
@@ -28,12 +29,29 @@ func About(w http.ResponseWriter, r *http.Request) {
 }
 
 func Reservation(w http.ResponseWriter, r *http.Request) {
+
+	res, ok := conf.App.Session.Get(r.Context(), "reservation").(models.Reservation)
+	if !ok {
+		conf.App.ErrorLog.Println("cannot get item from session")
+		conf.App.Session.Put(r.Context(), "error", "reservation is not correctly set")
+		http.Redirect(w, r, "/search-availability", http.StatusSeeOther)
+		return
+	}
+
+	sd := res.StartDate.Format("2006-01-02")
+	ed := res.EndDate.Format("2006-01-02")
+
+	stringMap := make(map[string]string)
+	stringMap["start_date"] = sd
+	stringMap["end_date"] = ed
+
 	data := make(map[string]interface{})
-	data["reservation"] = models.Reservation{}
+	data["reservation"] = res
 
 	render.Template(w, r, "make-reservation.page.tmpl", &models.TemplateData{
-		Form: forms.New(nil),
-		Data: data,
+		Form:      forms.New(nil),
+		Data:      data,
+		StringMap: stringMap,
 	})
 }
 
@@ -44,7 +62,7 @@ func ReservationSummary(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		conf.App.ErrorLog.Println("cannot get item from session")
 		conf.App.Session.Put(r.Context(), "error", "reservation is not correctly set")
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "/search-availability", http.StatusSeeOther)
 		return
 	}
 
@@ -67,7 +85,7 @@ func PostReservation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sd := r.Form.Get("start_date")
-	ed := r.Form.Get("start_date")
+	ed := r.Form.Get("end_date")
 
 	dateLayout := "2006-01-02"
 
@@ -113,7 +131,21 @@ func PostReservation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = conf.Repo.InsertReservation(reservation)
+	reservationId, err := conf.Repo.InsertReservation(reservation)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	restriction := models.RoomRestriction{
+		StartDate:     reservation.StartDate,
+		EndDate:       reservation.EndDate,
+		RoomID:        roomId,
+		ReservationID: reservationId,
+		RestrictionID: 1,
+	}
+
+	err = conf.Repo.InsertRoomRestriction(restriction)
 	if err != nil {
 		helpers.ServerError(w, err)
 		return
@@ -132,19 +164,83 @@ func Majors(w http.ResponseWriter, r *http.Request) {
 	render.Template(w, r, "majors.page.tmpl", &models.TemplateData{})
 }
 
-func Availability(w http.ResponseWriter, r *http.Request) {
+func SearchAvailability(w http.ResponseWriter, r *http.Request) {
 	render.Template(w, r, "search-availability.page.tmpl", &models.TemplateData{})
 }
 
-func PostAvailability(w http.ResponseWriter, r *http.Request) {
-	startDate := r.Form.Get("start-date")
-	endDate := r.Form.Get("end-date")
+func PostSearchAvailability(w http.ResponseWriter, r *http.Request) {
+	sd := r.Form.Get("start-date")
+	ed := r.Form.Get("end-date")
+	dateLayout := "2006-01-02"
 
-	fmt.Fprintln(w, startDate, endDate)
+	startDate, err := time.Parse(dateLayout, sd)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	endDate, err := time.Parse(dateLayout, ed)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	rooms, err := conf.Repo.SearchAvailabilityForAllRooms(startDate, endDate)
+	if err != nil {
+		helpers.ServerError(w, err)
+	}
+
+	if len(rooms) == 0 {
+		conf.App.Session.Put(r.Context(), "error", "No availability")
+		http.Redirect(w, r, "/search-availability", http.StatusSeeOther)
+		return
+	}
+
+	data := make(map[string]interface{})
+	data["rooms"] = rooms
+
+	reservation := models.Reservation{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	conf.App.Session.Put(r.Context(), "reservation", reservation)
+	render.Template(w, r, "choose-room.page.tmpl", &models.TemplateData{
+		Data: data,
+	})
 }
 
 func AvailabilityJson(w http.ResponseWriter, r *http.Request) {
 
+}
+
+func ChooseRoom(w http.ResponseWriter, r *http.Request) {
+
+	params := mux.Vars(r)
+	roomId, ok := params["roomId"]
+	if !ok {
+		helpers.ServerError(w, errors.New("id is not correct"))
+		return
+	}
+
+	res, ok := conf.App.Session.Get(r.Context(), "reservation").(models.Reservation)
+
+	if !ok {
+		conf.App.ErrorLog.Println("cannot get reservation from session")
+		conf.App.Session.Put(r.Context(), "error", "reservation is not correctly set")
+		http.Redirect(w, r, "/search-availability", http.StatusTemporaryRedirect)
+		return
+	}
+
+	intRoomId, err := strconv.Atoi(roomId)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	res.RoomID = intRoomId
+
+	conf.App.Session.Put(r.Context(), "reservation", res)
+
+	http.Redirect(w, r, "/make-reservation", http.StatusSeeOther)
 }
 
 func Contact(w http.ResponseWriter, r *http.Request) {

@@ -5,8 +5,8 @@ CREATE TABLE users
     last_name    VARCHAR(255)        NOT NULL,
     email        VARCHAR(255) UNIQUE NOT NULL,
     password     VARCHAR(255)        NOT NULL,
-    created_at   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL ,
+    updated_at   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL ,
     access_level INTEGER             NOT NULL
 );
 
@@ -14,16 +14,16 @@ CREATE TABLE rooms
 (
     id         SERIAL PRIMARY KEY,
     room_name  VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL ,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE restrictions
 (
     id               SERIAL PRIMARY KEY,
-    restriction_name VARCHAR(255),
-    created_at       TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at       TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    restriction_name VARCHAR(255) NOT NULL ,
+    created_at       TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL ,
+    updated_at       TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
@@ -36,9 +36,9 @@ CREATE TABLE reservations
     phone      VARCHAR(255)        NOT NULL,
     start_date DATE                NOT NULL,
     end_date   DATE                NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    room_id    INTEGER,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    room_id    INTEGER NOT NULL,
     CONSTRAINT fk_reservation_room FOREIGN KEY (room_id)
         REFERENCES rooms (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -48,13 +48,13 @@ CREATE TABLE reservations
 CREATE TABLE room_restrictions
 (
     id             SERIAL PRIMARY KEY,
-    start_date     DATE,
-    end_date       DATE,
-    room_id        INTEGER,
-    reservation_id INTEGER,
-    restriction_id INTEGER,
-    created_at     TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at     TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    start_date     DATE NOT NULL,
+    end_date       DATE NOT NULL,
+    room_id        INTEGER NOT NULL,
+    reservation_id INTEGER NULL ,
+    restriction_id INTEGER NOT NULL,
+    created_at     TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at     TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT fk_restriction_room FOREIGN KEY (room_id)
         REFERENCES rooms (id)
         ON DELETE CASCADE

@@ -9,9 +9,18 @@
                     Make reservation
                 </h1>
 
+                <p>
+                    Departure : {{index .StringMap "start_date"}}
+                    <br>
+                    Arrival : {{index .StringMap "end_date"}}
+                </p>
+
                 {{$res := index .Data "reservation"}}
                 <form action="" method="post" class="needs-validation" class="row g-3" novalidate>
                     <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                    <input type="hidden" name="room_id" value="{{$res.RoomID}}">
+                    <input type="hidden" name="start_date" value="{{index .StringMap "start_date"}}">
+                    <input type="hidden" name="end_date" value="{{index .StringMap "end_date"}}">
                     <div class="form-group">
                         <label for="first_name" class="form-label">First name: </label>
                         {{with .Form.Errors.Get "first_name"}}

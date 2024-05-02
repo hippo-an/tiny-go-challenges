@@ -6,6 +6,7 @@ import (
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/driver"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/handlers"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/helpers"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/render"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/repository"
@@ -94,6 +95,7 @@ func setupAppConfig() error {
 	app.Session = session
 
 	render.NewRenderer(&app)
+	helpers.NewHelpers(&app)
 
 	return nil
 }
