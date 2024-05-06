@@ -42,21 +42,72 @@
     <script>
         function checkAvailability() {
             const h = `
-            <form id="check-availability-form-modal" action="" method="" class="row needs-validation" novalidate>
+            <form id="check-availability-form-modal" action="" method="post" class="row needs-validation" novalidate>
                 <div id="reservation-dates-modal" class="form-group col-10">
                     <div class="form-group row">
                         <div class="form-group col">
-                            <input disabled required type="text" class="form-control" id="start-modal" name="start-modal" placeholder="Arrival">
+                            <input required type="text" class="form-control" id="start-modal" name="start-modal" placeholder="Arrival">
                         </div>
                         <div class="form-group col">
-                            <input disabled required class="form-control" type="text" id="end-modal" name="end-modal" placeholder="Departure">
+                            <input required class="form-control" type="text" id="end-modal" name="end-modal" placeholder="Departure">
                         </div>
                     </div>
                 </div>
             </form>
         `;
 
-            attention.custom({msg: h, title: "choose your date!"});
+            attention.custom({
+                msg: h,
+                title: "Choose your date",
+                willOpen: () => {
+                    const modalDate = document.getElementById('reservation-dates-modal');
+                    const rp = new DateRangePicker(modalDate, {
+                        format: 'yyyy-mm-dd',
+                        showOnFocus: false,
+                        minDate: new Date(),
+                    });
+                },
+                preConfirm: () => {
+                    return [
+                        document.getElementById("start-modal").value,
+                        document.getElementById("end-modal").value
+                    ];
+                },
+                callback: result => {
+
+                    const form = document.getElementById('check-availability-form-modal');
+                    const formData = new FormData(form);
+
+                    formData.append("csrf_token", "{{.CSRFToken}}");
+                    formData.append("room_id", "2");
+
+                    fetch('/search-availability-json', {
+                        method: 'post',
+                        body: formData,
+                    })
+                        .then(response => {
+                            return response.json()
+                        })
+                        .then(data => {
+                            if (data.Ok) {
+                                attention.custom({
+                                    icon: 'success',
+                                    showConfirmButton: false,
+                                    msg: '<p>Room is available!</p>'
+                                        + '<p><a href="/book-room?id='
+                                        + data.RomId
+                                        + '&s='
+                                        + data.StartDate
+                                        + '&e='
+                                        + EndDate
+                                        + " class="btn btn-primary">Book Now! </a></p>'
+                                })
+                            } else {
+                                attention.modal({msg: "No availability", icon: "error"})
+                            }
+                        })
+                }
+            });
         }
     </script>
 {{end}}

@@ -26,6 +26,7 @@ func route(app *config.AppConfig) http.Handler {
 	_ = r.HandleFunc("/search-availability-json", handlers.AvailabilityJson).Methods("POST")
 
 	_ = r.HandleFunc("/choose-room/{roomId}", handlers.ChooseRoom).Methods("GET")
+	_ = r.HandleFunc("/book-room", handlers.BookRoom).Methods("GET")
 
 	_ = r.HandleFunc("/make-reservation", handlers.Reservation).Methods("GET")
 	_ = r.HandleFunc("/reservation-summary", handlers.ReservationSummary).Methods("GET")

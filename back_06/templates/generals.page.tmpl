@@ -69,6 +69,7 @@
                     const rp = new DateRangePicker(modalDate, {
                         format: 'yyyy-mm-dd',
                         showOnFocus: false,
+                        minDate: new Date(),
                     });
                 },
                 preConfirm: () => {
@@ -83,17 +84,32 @@
                     const formData = new FormData(form);
 
                     formData.append("csrf_token", "{{.CSRFToken}}");
+                    formData.append("room_id", "1");
 
                     fetch('/search-availability-json', {
                         method: 'post',
                         body: formData,
                     })
                         .then(response => {
-                            // response.json()
-                            console.log(response)
+                            return response.json()
                         })
                         .then(data => {
-
+                            if (data.Ok) {
+                                attention.custom({
+                                    icon: 'success',
+                                    showConfirmButton: false,
+                                    msg: '<p>Room is available!</p>'
+                                        + '<p><a href="/book-room?id='
+                                        + data.RomId
+                                        + '&s='
+                                        + data.StartDate
+                                        + '&e='
+                                        + EndDate
+                                        + " class="btn btn-primary">Book Now! </a></p>'
+                                })
+                            } else {
+                                attention.modal({msg: "No availability", icon: "error"})
+                            }
                         })
                 }
             });

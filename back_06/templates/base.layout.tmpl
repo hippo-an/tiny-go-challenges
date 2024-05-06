@@ -167,26 +167,37 @@
                 const {
                     title = "",
                     msg = "",
-                    icon = "success",
+                    icon = "",
                     footer = "",
                 } = c;
 
                 Swal.fire({
                     icon: icon,
-                    title, title,
+                    title: title,
                     text: msg,
-                    footer, footer,
+                    footer: footer,
                 });
             }
 
 
             const custom = async function custom(c) {
+                const {
+                    title = "",
+                    msg = "",
+                    icon = "",
+                    showConfirmButton = true,
+                    footer = "",
+                } = c;
+
                 const {value: result} = await Swal.fire({
-                    title: c.title,
-                    html: c.msg,
+                    footer: footer,
+                    icon: icon,
+                    title: title,
+                    html: msg,
                     backdrop: false,
                     focusConfirm: false,
                     showCancelButton: true,
+                    showConfirmButton: showConfirmButton,
                     willOpen: () => {
                         if (c.willOpen !== undefined) {
                             c.willOpen();

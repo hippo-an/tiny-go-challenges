@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/forms"
@@ -229,7 +230,60 @@ func PostSearchAvailability(w http.ResponseWriter, r *http.Request) {
 }
 
 func AvailabilityJson(w http.ResponseWriter, r *http.Request) {
+	sd := r.Form.Get("start-modal")
+	ed := r.Form.Get("end-modal")
 
+	format := "2006-01-02"
+
+	startDate, err := time.Parse(format, sd)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	endDate, err := time.Parse(format, ed)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	roomId, err := strconv.Atoi(r.Form.Get("room_id"))
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	availability, err := conf.Repo.SearchAvailabilityByDateByRoomId(startDate, endDate, roomId)
+
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	response := struct {
+		Ok        bool   `json:"ok"`
+		Msg       string `json:"msg"`
+		StartDate string `json:"start_date"`
+		EndDate   string `json:"end_date"`
+		RoomId    int    `json:"room_id"`
+	}{
+		Ok:        availability,
+		Msg:       "",
+		StartDate: sd,
+		EndDate:   ed,
+		RoomId:    roomId,
+	}
+
+	prettyJson, err := json.MarshalIndent(response, "", "  ")
+
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(prettyJson)
+	return
 }
 
 func ChooseRoom(w http.ResponseWriter, r *http.Request) {
@@ -259,6 +313,38 @@ func ChooseRoom(w http.ResponseWriter, r *http.Request) {
 
 	conf.App.Session.Put(r.Context(), "reservation", res)
 
+	http.Redirect(w, r, "/make-reservation", http.StatusSeeOther)
+}
+func BookRoom(w http.ResponseWriter, r *http.Request) {
+	sd := r.URL.Query().Get("s")
+	ed := r.URL.Query().Get("e")
+
+	format := "2006-01-02"
+
+	startDate, err := time.Parse(format, sd)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	endDate, err := time.Parse(format, ed)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	roomId, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	var res models.Reservation
+	res.RoomID = roomId
+	res.StartDate = startDate
+	res.EndDate = endDate
+
+	conf.App.Session.Put(r.Context(), "reservation", res)
 	http.Redirect(w, r, "/make-reservation", http.StatusSeeOther)
 }
 

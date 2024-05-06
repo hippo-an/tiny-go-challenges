@@ -7,6 +7,7 @@ import (
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/render"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/repository"
 	"github.com/gorilla/mux"
 	"github.com/justinas/nosurf"
 	"html/template"
@@ -46,8 +47,11 @@ func getRoutes() http.Handler {
 
 	app.Session = session
 
-	repo := config.NewConfig(&app)
-	NewHandlers(repo)
+	// db settings ==========================================
+	repo := repository.NewTestRepository()
+
+	cfg := config.NewConfig(&app, repo)
+	NewHandlers(cfg)
 	render.NewRenderer(&app)
 
 	r := mux.NewRouter()
