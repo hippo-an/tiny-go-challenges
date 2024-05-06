@@ -10,4 +10,5 @@ type Repository interface {
 	InsertReservation(res models.Reservation) (int, error)
 	InsertRoomRestriction(roomRestriction models.RoomRestriction) error
 	SearchAvailabilityForAllRooms(start, end time.Time) ([]models.Room, error)
+	GetRoomById(id int) (models.Room, error)
 }

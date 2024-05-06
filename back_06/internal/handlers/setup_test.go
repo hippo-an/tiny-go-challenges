@@ -60,8 +60,8 @@ func getRoutes() http.Handler {
 	_ = r.HandleFunc("/generals-quarters", Generals).Methods("GET")
 	_ = r.HandleFunc("/majors-suite", Majors).Methods("GET")
 
-	_ = r.HandleFunc("/search-availability", Availability).Methods("GET")
-	_ = r.HandleFunc("/search-availability", PostAvailability).Methods("POST")
+	_ = r.HandleFunc("/search-availability", SearchAvailability).Methods("GET")
+	_ = r.HandleFunc("/search-availability", PostSearchAvailability).Methods("POST")
 	_ = r.HandleFunc("/search-availability-json", AvailabilityJson).Methods("POST")
 
 	_ = r.HandleFunc("/contact", Contact).Methods("GET")
