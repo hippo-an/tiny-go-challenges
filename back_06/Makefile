@@ -26,4 +26,13 @@ migratedown:
 run:
 	go run ./cmd/web
 
-.PHONY: rundb stopdb createdb dropdb migrateup migratedown run
+coverage:
+	@echo "Running tests with coverage..."
+	go test -coverprofile=coverage.out ./...
+
+coverage-report:
+	@echo "Generating coverage report..."
+	go tool cover -html=coverage.out
+	@echo "Coverage report generated: coverage.html"
+
+.PHONY: rundb stopdb createdb dropdb migrateup migratedown run coverage coverage-report

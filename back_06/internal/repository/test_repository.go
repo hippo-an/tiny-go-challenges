@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
 	"time"
 )
@@ -33,7 +34,22 @@ func (t *TestRepository) SearchAvailabilityForAllRooms(start, end time.Time) ([]
 }
 
 func (t *TestRepository) GetRoomById(id int) (models.Room, error) {
+
+	if id >= 100 {
+		return models.Room{}, errors.New("wrong")
+	}
 	var room models.Room
 	return room, nil
 
+}
+
+func (t *TestRepository) GetUserById(id int) (models.User, error) {
+	var u models.User
+	return u, nil
+}
+func (t *TestRepository) UpdateUser(m models.User) error {
+	return nil
+}
+func (t *TestRepository) Authenticate(email, password string) (int, error) {
+	return 1, nil
 }

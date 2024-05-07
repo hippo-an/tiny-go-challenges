@@ -37,6 +37,13 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.SQL.Close()
+	defer close(app.MailChan)
+
+	listenForMail()
+
+	//from := "sehyeong@here.com"
+	//auth := smtp.PlainAuth("", from, "", "localhost")
+	//smtp.SendMail("localhost:1025", auth, from, []string{"hello@there.com"}, []byte("Hello world"))
 
 	repo := repository.NewPostgresRepository(db)
 
@@ -63,6 +70,9 @@ func setupAppConfig() error {
 	gob.Register(models.Reservation{})
 	gob.Register(models.Room{})
 	gob.Register(models.Restriction{})
+
+	mailChan := make(chan models.MailData)
+	app.MailChan = mailChan
 
 	// production mode settings =============================
 	app.InProduction = false

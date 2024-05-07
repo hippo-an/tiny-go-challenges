@@ -16,6 +16,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"testing"
 	"time"
 )
 
@@ -23,7 +24,7 @@ var app config.AppConfig
 var session *scs.SessionManager
 var pathToTemplate = "./../../templates"
 
-func getRoutes() http.Handler {
+func TestMain(m *testing.M) {
 	gob.Register(models.Reservation{})
 
 	app.InProduction = false
@@ -47,12 +48,20 @@ func getRoutes() http.Handler {
 
 	app.Session = session
 
+	mailChan := make(chan models.MailData)
+	app.MailChan = mailChan
+	listenForMail()
+
 	// db settings ==========================================
 	repo := repository.NewTestRepository()
 
 	cfg := config.NewConfig(&app, repo)
 	NewHandlers(cfg)
 	render.NewRenderer(&app)
+
+	os.Exit(m.Run())
+}
+func getRoutes() http.Handler {
 
 	r := mux.NewRouter()
 
@@ -143,4 +152,13 @@ func GenerateTestTemplateCache() (map[string]*template.Template, error) {
 	}
 
 	return fullTemplateCache, nil
+}
+
+func listenForMail() {
+	go func() {
+		for {
+			_ = <-app.MailChan
+		}
+	}()
+
 }

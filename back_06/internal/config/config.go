@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/alexedwards/scs/v2"
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/repository"
 	"html/template"
 	"log"
@@ -29,4 +30,5 @@ type AppConfig struct {
 	ErrorLog      *log.Logger
 	InProduction  bool
 	Session       *scs.SessionManager
+	MailChan      chan models.MailData
 }

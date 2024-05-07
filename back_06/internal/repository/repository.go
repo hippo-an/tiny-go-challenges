@@ -12,4 +12,8 @@ type Repository interface {
 	SearchAvailabilityByDateByRoomId(start, end time.Time, roomId int) (bool, error)
 	SearchAvailabilityForAllRooms(start, end time.Time) ([]models.Room, error)
 	GetRoomById(id int) (models.Room, error)
+
+	GetUserById(id int) (models.User, error)
+	UpdateUser(m models.User) error
+	Authenticate(email, password string) (int, error)
 }

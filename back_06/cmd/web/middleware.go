@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/helpers"
 	"github.com/justinas/nosurf"
 	"log"
 	"net/http"
@@ -38,4 +39,16 @@ func CSRFMiddleware(next http.Handler) http.Handler {
 func SessionLoad(next http.Handler) http.Handler {
 	return session.LoadAndSave(next)
 
+}
+
+func Auth(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !helpers.IsAuthenticated(r) {
+			session.Put(r.Context(), "error", "Login required. ")
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }

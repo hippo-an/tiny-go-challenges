@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/forms"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/helpers"
@@ -33,16 +34,16 @@ func Reservation(w http.ResponseWriter, r *http.Request) {
 
 	res, ok := conf.App.Session.Get(r.Context(), "reservation").(models.Reservation)
 	if !ok {
-		conf.App.ErrorLog.Println("cannot get item from session")
 		conf.App.Session.Put(r.Context(), "error", "reservation is not correctly set")
-		http.Redirect(w, r, "/search-availability", http.StatusSeeOther)
+		http.Redirect(w, r, "/search-availability", http.StatusTemporaryRedirect)
 		return
 	}
 
 	room, err := conf.Repo.GetRoomById(res.RoomID)
 
 	if err != nil {
-		helpers.ServerError(w, err)
+		conf.App.Session.Put(r.Context(), "error", "can't find room")
+		http.Redirect(w, r, "/search-availability", http.StatusTemporaryRedirect)
 		return
 	}
 
@@ -100,7 +101,8 @@ func PostReservation(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 
 	if err != nil {
-		helpers.ServerError(w, err)
+		conf.App.Session.Put(r.Context(), "error", "can't parse form")
+		http.Redirect(w, r, "/search-availability", http.StatusTemporaryRedirect)
 		return
 	}
 
@@ -111,18 +113,22 @@ func PostReservation(w http.ResponseWriter, r *http.Request) {
 
 	startDate, err := time.Parse(dateLayout, sd)
 	if err != nil {
-		helpers.ServerError(w, err)
+		conf.App.Session.Put(r.Context(), "error", "start date format is incorrect")
+		http.Redirect(w, r, "/search-availability", http.StatusTemporaryRedirect)
 		return
 	}
 	endDate, err := time.Parse(dateLayout, ed)
 	if err != nil {
-		helpers.ServerError(w, err)
+		conf.App.Session.Put(r.Context(), "error", "end date format is incorrect")
+		http.Redirect(w, r, "/search-availability", http.StatusTemporaryRedirect)
 		return
 	}
 
 	roomId, err := strconv.Atoi(r.Form.Get("room_id"))
 	if err != nil {
 		helpers.ServerError(w, err)
+		conf.App.Session.Put(r.Context(), "error", "room id is incorrect")
+		http.Redirect(w, r, "/search-availability", http.StatusTemporaryRedirect)
 		return
 	}
 
@@ -154,6 +160,8 @@ func PostReservation(w http.ResponseWriter, r *http.Request) {
 	reservationId, err := conf.Repo.InsertReservation(reservation)
 	if err != nil {
 		helpers.ServerError(w, err)
+		conf.App.Session.Put(r.Context(), "error", "can't insert reservation into database")
+		http.Redirect(w, r, "/search-availability", http.StatusTemporaryRedirect)
 		return
 	}
 
@@ -168,8 +176,25 @@ func PostReservation(w http.ResponseWriter, r *http.Request) {
 	err = conf.Repo.InsertRoomRestriction(restriction)
 	if err != nil {
 		helpers.ServerError(w, err)
+		conf.App.Session.Put(r.Context(), "error", "can't insert room restriction")
+		http.Redirect(w, r, "/search-availability", http.StatusTemporaryRedirect)
 		return
 	}
+
+	htmlMsg := fmt.Sprintf(`
+		<h1>Reservation Confirmation</h1>
+		Dear %s,
+		The reservation confirmed from %s to %s
+	`, reservation.FirstName, sd, ed)
+
+	msg := models.MailData{
+		To:      reservation.Email,
+		From:    "me@here.com",
+		Subject: "Reservation Confirmation.",
+		Content: htmlMsg,
+	}
+
+	conf.App.MailChan <- msg
 
 	conf.App.Session.Put(r.Context(), "reservation", reservation)
 
@@ -350,4 +375,38 @@ func BookRoom(w http.ResponseWriter, r *http.Request) {
 
 func Contact(w http.ResponseWriter, r *http.Request) {
 	render.Template(w, r, "contact.page.tmpl", &models.TemplateData{})
+}
+
+func PostLogin(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+
+	if err != nil {
+		helpers.ServerError(w, err)
+		conf.App.Session.Put(r.Context(), "error", "can't parse the form")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	email := r.Form.Get("email")
+	password := r.Form.Get("password")
+
+	form := forms.New(r.PostForm)
+	form.Required(email, password)
+
+	if !form.Valid() {
+		return
+	}
+
+	id, err := conf.Repo.Authenticate(email, password)
+
+	if err != nil {
+		helpers.ServerError(w, err)
+		conf.App.Session.Put(r.Context(), "error", "can't parse the form")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	conf.App.Session.Put(r.Context(), "user_id", id)
+	conf.App.Session.Put(r.Context(), "flash", "Logged in successfully")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+
 }
