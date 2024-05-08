@@ -1,10 +1,11 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/handlers"
 	"github.com/gorilla/mux"
-	"net/http"
 )
 
 func route(app *config.AppConfig) http.Handler {
@@ -37,5 +38,13 @@ func route(app *config.AppConfig) http.Handler {
 
 	fileServer := http.FileServer(http.Dir("./static/"))
 	_ = r.PathPrefix("/").Handler(http.StripPrefix("/static", fileServer))
+
+	admRouter := r.PathPrefix("/admin").Subrouter()
+
+	admRouter.Use(Auth)
+
+	_ = admRouter.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("hello"))
+	}).Methods("GET")
 	return r
 }

@@ -2,6 +2,13 @@ package main
 
 import (
 	"encoding/gob"
+	"flag"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"time"
+
 	"github.com/alexedwards/scs/v2"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/driver"
@@ -10,13 +17,16 @@ import (
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/render"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/repository"
-	"log"
-	"net/http"
-	"os"
-	"time"
 )
 
 const portNumber = ":8008"
+
+var dbHost *string
+var dbName *string
+var dbUser *string
+var dbPass *string
+var dbPort *string
+var dbSSL *string
 
 var (
 	app     config.AppConfig
@@ -32,7 +42,8 @@ func main() {
 	}
 
 	// db settings ==========================================
-	db, err := driver.ConnectSQL("postgres", "postgresql://root:secret@localhost:15432/booking?sslmode=disable")
+	connectionString := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s", *dbUser, *dbPass, *dbHost, *dbPort, *dbName, *dbSSL)
+	db, err := driver.ConnectSQL("postgres", connectionString)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -71,11 +82,24 @@ func setupAppConfig() error {
 	gob.Register(models.Room{})
 	gob.Register(models.Restriction{})
 
+	// read flags
+
+	inProduction := flag.Bool("production", false, "Application is in production")
+	useCache := flag.Bool("cache", false, "Use template cache")
+	dbHost = flag.String("dbhost", "localhost", "Database host")
+	dbName = flag.String("dbname", "booking", "Database name")
+	dbUser = flag.String("dbuser", "root", "Database user")
+	dbPass = flag.String("dbpass", "secret", "Database password")
+	dbPort = flag.String("dbport", "15432", "Database port")
+	dbSSL = flag.String("dbssl", "disable", "Database ssl settings(disable, prefer, require)")
+
+	flag.Parse()
+
 	mailChan := make(chan models.MailData)
 	app.MailChan = mailChan
 
 	// production mode settings =============================
-	app.InProduction = false
+	app.InProduction = *inProduction
 
 	// logger settings ======================================
 	var infoLog *log.Logger
@@ -93,7 +117,7 @@ func setupAppConfig() error {
 		log.Fatal("cannot create template cache")
 	}
 	app.TemplateCache = tc
-	app.UseCache = app.InProduction
+	app.UseCache = *useCache
 
 	// session settings =====================================
 	session = scs.New()

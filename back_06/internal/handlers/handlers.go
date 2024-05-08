@@ -4,15 +4,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/forms"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/helpers"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
 	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/render"
 	"github.com/gorilla/mux"
-	"net/http"
-	"strconv"
-	"time"
 )
 
 var conf *config.Config
@@ -409,4 +410,10 @@ func PostLogin(w http.ResponseWriter, r *http.Request) {
 	conf.App.Session.Put(r.Context(), "flash", "Logged in successfully")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 
+}
+
+func PostLogout(w http.ResponseWriter, r *http.Request) {
+	_ = conf.App.Session.Destroy(r.Context())
+	_ = conf.App.Session.RenewToken(r.Context())
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
