@@ -1,5 +1,4 @@
 rundb:
-	docker image pull postgres:16.2-alpine3.19
 	docker container run \
          --name mom-bank \
          -p 5432:5432 \
