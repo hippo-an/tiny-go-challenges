@@ -116,3 +116,7 @@ fabric.properties
 /twitter_08/.keys.json
 /back_06/bookings
 /htmxepl/bin/
+/htmxepl/tmp/
+**/*_templ.go
+**/*_templ.txt
+/htmxepl/twc

@@ -1,0 +1,21 @@
+package home
+
+import (
+    "github.com/dev-hippo-an/tiny-go-challenges/htmxepl/views/layouts"
+)
+
+templ Home(title string) {
+    @layouts.Base(title) {
+    <div>
+        <div class="flex flex-col items-center">
+            <div class="text-xl text-blue-500 font-bold ">Home page</div>
+        </div>
+
+        <button hx-get="/click" hx-indicator="#indicator">
+            Click Me!
+            <img id="indicator" class="htmx-indicator fill-orange-600" src="/public/spinning-circles.svg" alt="aaa"/>
+        </button>
+    </div>
+
+    }
+}
