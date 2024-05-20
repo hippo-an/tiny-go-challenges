@@ -90,23 +90,44 @@ func (s *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferT
 			return err
 		}
 
-		result.FromAccount, err = q.UpdateAccount(ctx, UpdateAccountParams{
-			ID:      arg.FromAccountID,
-			Balance: -arg.Amount,
-		})
+		// to avoid deadlock always same order
+		if arg.FromAccountID < arg.ToAccountID {
+			result.FromAccount, err = q.UpdateAccount(ctx, UpdateAccountParams{
+				ID:      arg.FromAccountID,
+				Balance: -arg.Amount,
+			})
 
-		if err != nil {
-			return err
+			if err != nil {
+				return err
+			}
+
+			result.ToAccount, err = q.UpdateAccount(ctx, UpdateAccountParams{
+				ID:      arg.ToAccountID,
+				Balance: arg.Amount,
+			})
+
+			if err != nil {
+				return err
+			}
+		} else {
+			result.ToAccount, err = q.UpdateAccount(ctx, UpdateAccountParams{
+				ID:      arg.ToAccountID,
+				Balance: arg.Amount,
+			})
+			if err != nil {
+				return err
+			}
+
+			result.FromAccount, err = q.UpdateAccount(ctx, UpdateAccountParams{
+				ID:      arg.FromAccountID,
+				Balance: -arg.Amount,
+			})
+
+			if err != nil {
+				return err
+			}
 		}
 
-		result.ToAccount, err = q.UpdateAccount(ctx, UpdateAccountParams{
-			ID:      arg.ToAccountID,
-			Balance: arg.Amount,
-		})
-
-		if err != nil {
-			return err
-		}
 		return nil
 
 	})
