@@ -25,7 +25,10 @@ migratedown:
 sqlc:
 	sqlc generate
 
+server:
+	go run main.go
+
 test:
 	go test -v -cover ./...
 
-.PHONY: rundb stopdb createdb dropdb migrateup migratedown sqlc test
+.PHONY: rundb stopdb createdb dropdb migrateup migratedown sqlc test server
