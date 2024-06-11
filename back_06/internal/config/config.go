@@ -1,11 +1,12 @@
 package config
 
 import (
-	"github.com/alexedwards/scs/v2"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/repository"
 	"html/template"
 	"log"
+
+	"github.com/alexedwards/scs/v2"
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/models"
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/repository"
 )
 
 // Config is the repository type

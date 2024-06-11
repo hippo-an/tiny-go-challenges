@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
-	"github.com/gorilla/mux"
 	"testing"
+
+	"github.com/gorilla/mux"
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/config"
 )
 
 func TestRoutes(t *testing.T) {

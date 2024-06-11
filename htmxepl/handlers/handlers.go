@@ -1,9 +1,10 @@
 package handlers
 
 import (
-	"github.com/dev-hippo-an/tiny-go-challenges/htmxepl/views/home"
 	"net/http"
 	"time"
+
+	"github.com/hippo-an/tiny-go-challenges/htmxepl/views/home"
 )
 
 func HandleHome(w http.ResponseWriter, r *http.Request) error {

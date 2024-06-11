@@ -2,14 +2,15 @@ package render
 
 import (
 	"encoding/gob"
-	"github.com/alexedwards/scs/v2"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
 	"log"
 	"net/http"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/alexedwards/scs/v2"
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/config"
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/models"
 )
 
 var session *scs.SessionManager

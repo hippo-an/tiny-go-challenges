@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/helpers"
-	"github.com/justinas/nosurf"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/helpers"
+	"github.com/justinas/nosurf"
 )
 
 var whiteList = []string{"/static/**", "/favicon.ico"}

@@ -3,12 +3,13 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/models"
 )
 
 type postData struct {

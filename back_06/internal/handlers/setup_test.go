@@ -3,13 +3,6 @@ package handlers
 import (
 	"encoding/gob"
 	"fmt"
-	"github.com/alexedwards/scs/v2"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/render"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/repository"
-	"github.com/gorilla/mux"
-	"github.com/justinas/nosurf"
 	"html/template"
 	"log"
 	"net/http"
@@ -18,6 +11,14 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/alexedwards/scs/v2"
+	"github.com/gorilla/mux"
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/config"
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/models"
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/render"
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/repository"
+	"github.com/justinas/nosurf"
 )
 
 var app config.AppConfig

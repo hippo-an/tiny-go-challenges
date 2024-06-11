@@ -4,8 +4,8 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/dev-hippo-an/tiny-go-challenges/task_cli_07/cmd"
-	"github.com/dev-hippo-an/tiny-go-challenges/task_cli_07/db"
+	"github.com/hippo-an/tiny-go-challenges/task_cli_07/cmd"
+	"github.com/hippo-an/tiny-go-challenges/task_cli_07/db"
 	"github.com/mitchellh/go-homedir"
 )
 

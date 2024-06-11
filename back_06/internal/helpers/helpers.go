@@ -2,9 +2,10 @@ package helpers
 
 import (
 	"fmt"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
 	"net/http"
 	"runtime/debug"
+
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/config"
 )
 
 var app *config.AppConfig

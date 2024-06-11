@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dev-hippo-an/tiny-go-challenges/qhn_05/client"
+	"github.com/hippo-an/tiny-go-challenges/qhn_05/client"
 )
 
 func main() {

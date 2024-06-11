@@ -1,6 +1,6 @@
 package models
 
-import "github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/forms"
+import "github.com/hippo-an/tiny-go-challenges/back_06/internal/forms"
 
 // TemplateData holds data sent from handlers to templates
 type TemplateData struct {

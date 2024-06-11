@@ -3,11 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/dev-hippo-an/tiny-go-challenges/adventure_04/internal/handlers"
-	"github.com/dev-hippo-an/tiny-go-challenges/adventure_04/internal/models"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/hippo-an/tiny-go-challenges/adventure_04/internal/handlers"
+	"github.com/hippo-an/tiny-go-challenges/adventure_04/internal/models"
 )
 
 func main() {

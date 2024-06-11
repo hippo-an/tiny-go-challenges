@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/config"
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/models"
 	"github.com/justinas/nosurf"
 )
 

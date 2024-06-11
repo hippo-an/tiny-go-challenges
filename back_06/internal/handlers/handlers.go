@@ -8,12 +8,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/forms"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/helpers"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/render"
 	"github.com/gorilla/mux"
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/config"
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/forms"
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/helpers"
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/models"
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/render"
 )
 
 var conf *config.Config

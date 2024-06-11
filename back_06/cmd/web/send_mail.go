@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
-	mail "github.com/xhit/go-simple-mail/v2"
 	"log"
 	"time"
+
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/models"
+	mail "github.com/xhit/go-simple-mail/v2"
 )
 
 func listenForMail() {

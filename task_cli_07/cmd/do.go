@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/dev-hippo-an/tiny-go-challenges/task_cli_07/db"
-	"github.com/spf13/cobra"
 	"os"
 	"strconv"
+
+	"github.com/hippo-an/tiny-go-challenges/task_cli_07/db"
+	"github.com/spf13/cobra"
 )
 
 var doCmd = &cobra.Command{

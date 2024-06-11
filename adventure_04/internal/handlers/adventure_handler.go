@@ -1,12 +1,13 @@
 package handlers
 
 import (
-	"github.com/dev-hippo-an/tiny-go-challenges/adventure_04/internal/models"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/hippo-an/tiny-go-challenges/adventure_04/internal/models"
 )
 
 func init() {

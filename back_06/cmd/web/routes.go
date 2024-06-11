@@ -3,9 +3,9 @@ package main
 import (
 	"net/http"
 
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/config"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/handlers"
 	"github.com/gorilla/mux"
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/config"
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/handlers"
 )
 
 func route(app *config.AppConfig) http.Handler {

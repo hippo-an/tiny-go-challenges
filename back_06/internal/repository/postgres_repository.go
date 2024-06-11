@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/driver"
-	"github.com/dev-hippo-an/tiny-go-challenges/back_06/internal/models"
-	"golang.org/x/crypto/bcrypt"
 	"time"
+
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/driver"
+	"github.com/hippo-an/tiny-go-challenges/back_06/internal/models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type PostgresRepository struct {

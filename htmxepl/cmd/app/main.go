@@ -1,13 +1,14 @@
 package main
 
 import (
-	"github.com/dev-hippo-an/tiny-go-challenges/htmxepl/handlers"
-	"github.com/go-chi/chi/v5"
-	"github.com/joho/godotenv"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/hippo-an/tiny-go-challenges/htmxepl/handlers"
+	"github.com/joho/godotenv"
 )
 
 func main() {
