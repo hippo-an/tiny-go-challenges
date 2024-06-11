@@ -2,9 +2,10 @@ package db
 
 import (
 	"context"
-	"github.com/dev-hippo-an/tiny-go-challenges/mombank_11/util"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/hippo-an/tiny-go-challenges/mombank_11/util"
+	"github.com/stretchr/testify/require"
 )
 
 func createRandomTransfer(t *testing.T, fromA, toA Account) Transfer {

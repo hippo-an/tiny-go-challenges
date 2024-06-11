@@ -2,10 +2,11 @@ package main
 
 import (
 	"database/sql"
-	"github.com/dev-hippo-an/tiny-go-challenges/mombank_11/api"
-	db "github.com/dev-hippo-an/tiny-go-challenges/mombank_11/db/sqlc"
-	"github.com/dev-hippo-an/tiny-go-challenges/mombank_11/util"
 	"log"
+
+	"github.com/hippo-an/tiny-go-challenges/mombank_11/api"
+	db "github.com/hippo-an/tiny-go-challenges/mombank_11/db/sqlc"
+	"github.com/hippo-an/tiny-go-challenges/mombank_11/util"
 
 	_ "github.com/lib/pq"
 )

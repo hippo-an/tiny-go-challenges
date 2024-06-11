@@ -2,8 +2,9 @@ package db
 
 import (
 	"context"
-	"github.com/dev-hippo-an/tiny-go-challenges/mombank_11/util"
 	"testing"
+
+	"github.com/hippo-an/tiny-go-challenges/mombank_11/util"
 
 	"github.com/stretchr/testify/require"
 )

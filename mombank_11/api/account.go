@@ -3,9 +3,10 @@ package api
 import (
 	"database/sql"
 	"errors"
-	db "github.com/dev-hippo-an/tiny-go-challenges/mombank_11/db/sqlc"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	db "github.com/hippo-an/tiny-go-challenges/mombank_11/db/sqlc"
 )
 
 type createAccountRequest struct {
