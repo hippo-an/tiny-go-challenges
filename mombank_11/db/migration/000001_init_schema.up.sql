@@ -47,11 +47,11 @@ COMMENT ON COLUMN "entries"."amount" IS 'can be negative or positive';
 
 COMMENT ON COLUMN "transfers"."amount" IS 'must be positive';
 
-ALTER TABLE "entries"
+ALTER TABLE IF EXISTS "entries"
     ADD FOREIGN KEY ("account_id") REFERENCES "accounts" ("id");
 
-ALTER TABLE "transfers"
+ALTER TABLE IF EXISTS "transfers"
     ADD FOREIGN KEY ("from_account_id") REFERENCES "accounts" ("id");
 
-ALTER TABLE "transfers"
+ALTER TABLE IF EXISTS "transfers"
     ADD FOREIGN KEY ("to_account_id") REFERENCES "accounts" ("id");

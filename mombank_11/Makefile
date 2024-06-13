@@ -23,7 +23,13 @@ dropdb:
 migrateup:
 	@migrate -path db/migration -database "postgresql://root:secret@localhost:5432/mom_bank?sslmode=disable" -verbose up
 
+muone:
+	@migrate -path db/migration -database "postgresql://root:secret@localhost:5432/mom_bank?sslmode=disable" -verbose up 1
+
 migratedown:
+	@migrate -path db/migration -database "postgresql://root:secret@localhost:5432/mom_bank?sslmode=disable" -verbose down
+
+mdone:
 	@migrate -path db/migration -database "postgresql://root:secret@localhost:5432/mom_bank?sslmode=disable" -verbose down 1
 
 sqlc:
@@ -42,4 +48,4 @@ test-cover:
 mock:
 	@mockgen -package mockdb -destination db/mock/store.go github.com/hippo-an/tiny-go-challenges/mombank_11/db/sqlc Store
 
-.PHONY: rundb stopdb createdb dropdb migrateup migratedown sqlc test server mock test-cover
+.PHONY: rundb stopdb createdb dropdb migrateup migratedown sqlc test server mock test-cover mdone muone
