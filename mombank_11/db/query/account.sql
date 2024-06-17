@@ -1,8 +1,9 @@
 -- name: CreateAccount :one
-INSERT INTO "accounts" ("owner",
+INSERT INTO "accounts" ("user_id", 
+                        "owner",
                       "balance",
                       "currency")
-VALUES ($1, $2, $3) RETURNING *;
+VALUES (sqlc.arg(user_id), sqlc.arg(owner), sqlc.arg(balance), sqlc.arg(currency)) RETURNING *;
 
 -- name: GetAccount :one
 SELECT *
