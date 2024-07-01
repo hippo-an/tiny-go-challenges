@@ -7,12 +7,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	db "github.com/hippo-an/tiny-go-challenges/mombank_11/db/sqlc"
+	"github.com/hippo-an/tiny-go-challenges/mombank_11/token"
 )
 
 type createAccountRequest struct {
-	Owner    string `json:"owner" binding:"required"`
 	Currency string `json:"currency" binding:"required,currency"`
-	UserID   int64  `json:"user_id" binding:"required,min=1"`
 }
 
 func (s *Server) createAccount(c *gin.Context) {
@@ -22,9 +21,10 @@ func (s *Server) createAccount(c *gin.Context) {
 		return
 	}
 
+	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
+
 	arg := db.CreateAccountParams{
-		UserID:   req.UserID,
-		Owner:    req.Owner,
+		UserID:   authPayload.UserId,
 		Balance:  0,
 		Currency: req.Currency,
 	}
@@ -61,6 +61,13 @@ func (s *Server) getAccount(c *gin.Context) {
 		return
 	}
 
+	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
+	if account.UserID != authPayload.UserId {
+		err := errors.New("account does not belong to the authenticated user")
+		c.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	c.JSON(http.StatusOK, account)
 }
 
@@ -77,9 +84,12 @@ func (s *Server) listAccount(c *gin.Context) {
 		return
 	}
 
+	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
+
 	arg := db.ListAccountsParams{
-		Limit:  req.PageSize,
-		Offset: req.PageID - 1,
+		UserID:  authPayload.UserId,
+		Limits:  req.PageSize,
+		Offsets: req.PageID - 1,
 	}
 	account, err := s.store.ListAccounts(c, arg)
 

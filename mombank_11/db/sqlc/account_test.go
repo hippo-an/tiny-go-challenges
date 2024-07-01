@@ -14,7 +14,6 @@ func createRandomAccount(t *testing.T) Account {
 	user := createRandomUser(t)
 	arg := CreateAccountParams{
 		UserID:   user.ID,
-		Owner:    util.RandomOwner(),
 		Balance:  util.RandomMoney(),
 		Currency: util.RandomCurrency(),
 	}
@@ -24,7 +23,7 @@ func createRandomAccount(t *testing.T) Account {
 	require.NoError(t, err, "error should be nil")
 	require.NotEmpty(t, account, "account must not be empty")
 
-	require.Equal(t, arg.Owner, account.Owner)
+	require.Equal(t, arg.UserID, account.UserID)
 	require.Equal(t, arg.Balance, account.Balance)
 	require.Equal(t, arg.Currency, account.Currency)
 
@@ -77,16 +76,23 @@ func TestQueries_DeleteAccount(t *testing.T) {
 }
 
 func TestQueries_ListAccounts(t *testing.T) {
+	var lastAccount Account
 	for i := 0; i < 10; i++ {
-		createRandomAccount(t)
+		lastAccount = createRandomAccount(t)
 	}
 
 	arg := ListAccountsParams{
-		Limit:  5,
-		Offset: 0,
+		UserID:  lastAccount.UserID,
+		Limits:  5,
+		Offsets: 0,
 	}
 
 	accounts, err := testQueries.ListAccounts(context.Background(), arg)
 	require.NoError(t, err)
-	require.Len(t, accounts, 5)
+	require.NotEmpty(t, accounts)
+
+	for _, account := range accounts {
+		require.NotEmpty(t, account)
+		require.Equal(t, lastAccount.UserID, account.UserID)
+	}
 }

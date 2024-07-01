@@ -11,26 +11,19 @@ import (
 
 const createAccount = `-- name: CreateAccount :one
 INSERT INTO "accounts" ("user_id", 
-                        "owner",
                       "balance",
                       "currency")
-VALUES ($1, $2, $3, $4) RETURNING id, owner, balance, currency, created_at, user_id
+VALUES ($1, $2, $3) RETURNING id, owner, balance, currency, created_at, user_id
 `
 
 type CreateAccountParams struct {
 	UserID   int64  `json:"user_id"`
-	Owner    string `json:"owner"`
 	Balance  int64  `json:"balance"`
 	Currency string `json:"currency"`
 }
 
 func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {
-	row := q.db.QueryRowContext(ctx, createAccount,
-		arg.UserID,
-		arg.Owner,
-		arg.Balance,
-		arg.Currency,
-	)
+	row := q.db.QueryRowContext(ctx, createAccount, arg.UserID, arg.Balance, arg.Currency)
 	var i Account
 	err := row.Scan(
 		&i.ID,
@@ -97,18 +90,20 @@ func (q *Queries) GetAccountForUpdate(ctx context.Context, id int64) (Account, e
 const listAccounts = `-- name: ListAccounts :many
 SELECT id, owner, balance, currency, created_at, user_id
 FROM "accounts"
+where user_id = $1
 ORDER BY id DESC
-LIMIT $1
+LIMIT $3
 OFFSET $2
 `
 
 type ListAccountsParams struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
+	UserID  int64 `json:"user_id"`
+	Offsets int32 `json:"offsets"`
+	Limits  int32 `json:"limits"`
 }
 
 func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountsParams) ([]Account, error) {
-	rows, err := q.db.QueryContext(ctx, listAccounts, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listAccounts, arg.UserID, arg.Offsets, arg.Limits)
 	if err != nil {
 		return nil, err
 	}

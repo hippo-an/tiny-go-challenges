@@ -1,9 +1,8 @@
 -- name: CreateAccount :one
 INSERT INTO "accounts" ("user_id", 
-                        "owner",
                       "balance",
                       "currency")
-VALUES (sqlc.arg(user_id), sqlc.arg(owner), sqlc.arg(balance), sqlc.arg(currency)) RETURNING *;
+VALUES (sqlc.arg(user_id), sqlc.arg(balance), sqlc.arg(currency)) RETURNING *;
 
 -- name: GetAccount :one
 SELECT *
@@ -19,9 +18,10 @@ FOR NO KEY UPDATE ;
 -- name: ListAccounts :many
 SELECT *
 FROM "accounts"
+where user_id = sqlc.arg(user_id)
 ORDER BY id DESC
-LIMIT $1
-OFFSET $2;
+LIMIT sqlc.arg(limits)
+OFFSET sqlc.arg(offsets);
 
 -- name: UpdateAccount :one
 UPDATE "accounts"
