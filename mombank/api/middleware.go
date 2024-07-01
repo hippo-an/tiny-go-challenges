@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/hippo-an/tiny-go-challenges/mombank_11/token"
+	"github.com/hippo-an/tiny-go-challenges/mombank/token"
 )
 
 const (

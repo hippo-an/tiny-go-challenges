@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/go-playground/validator/v10"
-	"github.com/hippo-an/tiny-go-challenges/mombank_11/util"
+	"github.com/hippo-an/tiny-go-challenges/mombank/util"
 )
 
 var validCurrency validator.Func = func(fl validator.FieldLevel) bool {

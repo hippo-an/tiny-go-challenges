@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	db "github.com/hippo-an/tiny-go-challenges/mombank_11/db/sqlc"
-	"github.com/hippo-an/tiny-go-challenges/mombank_11/token"
-	"github.com/hippo-an/tiny-go-challenges/mombank_11/util"
+	db "github.com/hippo-an/tiny-go-challenges/mombank/db/sqlc"
+	"github.com/hippo-an/tiny-go-challenges/mombank/token"
+	"github.com/hippo-an/tiny-go-challenges/mombank/util"
 )
 
 type Server struct {

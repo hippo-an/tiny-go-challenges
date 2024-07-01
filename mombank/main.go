@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/hippo-an/tiny-go-challenges/mombank_11/api"
-	db "github.com/hippo-an/tiny-go-challenges/mombank_11/db/sqlc"
-	"github.com/hippo-an/tiny-go-challenges/mombank_11/util"
+	"github.com/hippo-an/tiny-go-challenges/mombank/api"
+	db "github.com/hippo-an/tiny-go-challenges/mombank/db/sqlc"
+	"github.com/hippo-an/tiny-go-challenges/mombank/util"
 
 	_ "github.com/lib/pq"
 )

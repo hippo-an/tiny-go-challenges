@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/hippo-an/tiny-go-challenges/mombank_11/util"
+	"github.com/hippo-an/tiny-go-challenges/mombank/util"
 
 	"github.com/stretchr/testify/require"
 )

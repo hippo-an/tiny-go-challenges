@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	db "github.com/hippo-an/tiny-go-challenges/mombank_11/db/sqlc"
-	"github.com/hippo-an/tiny-go-challenges/mombank_11/token"
+	db "github.com/hippo-an/tiny-go-challenges/mombank/db/sqlc"
+	"github.com/hippo-an/tiny-go-challenges/mombank/token"
 )
 
 type createAccountRequest struct {

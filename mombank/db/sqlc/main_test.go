@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hippo-an/tiny-go-challenges/mombank_11/util"
+	"github.com/hippo-an/tiny-go-challenges/mombank/util"
 
 	_ "github.com/lib/pq"
 )

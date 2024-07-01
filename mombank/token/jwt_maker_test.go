@@ -4,16 +4,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hippo-an/tiny-go-challenges/mombank_11/util"
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/hippo-an/tiny-go-challenges/mombank/util"
 	"github.com/stretchr/testify/require"
 )
 
-func TestPasetoMaker(t *testing.T) {
-	maker, err := NewPasetoMaker(util.RandomString(32))
+func TestJWTMaker(t *testing.T) {
+
+	maker, err := NewJWTMaker(util.RandomString(32))
 	require.NoError(t, err)
 
-	userId := util.RandomInt(1, 1000000)
+	userId := util.RandomInt(1, 10000)
 	duration := time.Minute
+
 	issuedAt := time.Now()
 	expiredAt := issuedAt.Add(duration)
 
@@ -27,12 +30,11 @@ func TestPasetoMaker(t *testing.T) {
 
 	require.NotZero(t, payload.ID)
 	require.Equal(t, payload.UserId, userId)
-	require.WithinDuration(t, issuedAt, payload.IssusedAt, time.Second)
 	require.WithinDuration(t, expiredAt, payload.ExpiredAt, time.Second)
 }
 
-func TestExpiredPasetoToken(t *testing.T) {
-	maker, err := NewPasetoMaker(util.RandomString(32))
+func TestExpiredJWTToken(t *testing.T) {
+	maker, err := NewJWTMaker(util.RandomString(32))
 	require.NoError(t, err)
 
 	token, err := maker.CreateToken(util.RandomInt(1, 1000), -time.Minute)
@@ -42,5 +44,23 @@ func TestExpiredPasetoToken(t *testing.T) {
 	payload, err := maker.VerifyToken(token)
 	require.Error(t, err)
 	require.EqualError(t, err, ErrExpiredToken.Error())
+	require.Nil(t, payload)
+}
+
+func TestInvalidJWTTokenAlgNone(t *testing.T) {
+	payload, err := NewPayload(util.RandomInt(1, 10000), time.Minute)
+	require.NoError(t, err)
+
+	jwtToken := jwt.NewWithClaims(jwt.SigningMethodNone, payload)
+
+	token, err := jwtToken.SignedString(jwt.UnsafeAllowNoneSignatureType)
+	require.NoError(t, err)
+
+	maker, err := NewJWTMaker(util.RandomString(32))
+	require.NoError(t, err)
+
+	payload, err = maker.VerifyToken(token)
+	require.Error(t, err)
+	require.EqualError(t, err, ErrInvalidToken.Error())
 	require.Nil(t, payload)
 }

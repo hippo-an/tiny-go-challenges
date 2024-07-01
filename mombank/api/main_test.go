@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	db "github.com/hippo-an/tiny-go-challenges/mombank_11/db/sqlc"
-	"github.com/hippo-an/tiny-go-challenges/mombank_11/util"
+	db "github.com/hippo-an/tiny-go-challenges/mombank/db/sqlc"
+	"github.com/hippo-an/tiny-go-challenges/mombank/util"
 	"github.com/stretchr/testify/require"
 )
 

@@ -12,10 +12,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	mockdb "github.com/hippo-an/tiny-go-challenges/mombank_11/db/mock"
-	db "github.com/hippo-an/tiny-go-challenges/mombank_11/db/sqlc"
-	"github.com/hippo-an/tiny-go-challenges/mombank_11/token"
-	"github.com/hippo-an/tiny-go-challenges/mombank_11/util"
+	mockdb "github.com/hippo-an/tiny-go-challenges/mombank/db/mock"
+	db "github.com/hippo-an/tiny-go-challenges/mombank/db/sqlc"
+	"github.com/hippo-an/tiny-go-challenges/mombank/token"
+	"github.com/hippo-an/tiny-go-challenges/mombank/util"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )

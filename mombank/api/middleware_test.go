@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/hippo-an/tiny-go-challenges/mombank_11/token"
-	"github.com/hippo-an/tiny-go-challenges/mombank_11/util"
+	"github.com/hippo-an/tiny-go-challenges/mombank/token"
+	"github.com/hippo-an/tiny-go-challenges/mombank/util"
 	"github.com/stretchr/testify/require"
 )
 
