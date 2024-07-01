@@ -232,7 +232,7 @@ func TestCreateUser(t *testing.T) {
 			mockStore := mockdb.NewMockStore(ctr)
 
 			tc.BuildStub(mockStore)
-			server := NewServer(mockStore)
+			server := NewTestServer(t, mockStore)
 			recorder := httptest.NewRecorder()
 
 			b, err := json.Marshal(tc.Req)

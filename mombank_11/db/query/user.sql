@@ -15,3 +15,9 @@ insert into users (
 select * from users
 where id = sqlc.arg(user_id)
 limit 1;
+
+
+-- name: GetUserByUsername :one
+select * from users
+where username = sqlc.arg(username)
+limit 1;
