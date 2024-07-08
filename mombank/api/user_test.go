@@ -249,7 +249,7 @@ func TestCreateUser(t *testing.T) {
 
 func createRandomUser() db.User {
 	return db.User{
-		ID:        util.RandomInt(1, 10000),
+		ID:        util.RandomInt(1, 100000000),
 		Username:  util.RandomString(6),
 		FullName:  util.RandomOwner(),
 		Email:     util.RandomEmail(),
