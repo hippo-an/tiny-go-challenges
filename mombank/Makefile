@@ -64,4 +64,7 @@ proto:
 			--go-grpc_opt=paths=source_relative \
 			./proto/*.proto 
 
+evans:
+	@evans --host localhost --port 9090 -r rep
+
 .PHONY: rundb stopdb createdb dropdb migrateup migratedown sqlc test server mock test-cover mdone muone container proto
