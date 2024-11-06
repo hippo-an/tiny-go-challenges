@@ -8,5 +8,6 @@ import (
 
 func (a *application) routes() http.Handler {
 	mux := echo.New()
+	mux.GET("/virtual-terminal", a.VirtualTerminal)
 	return mux
 }
