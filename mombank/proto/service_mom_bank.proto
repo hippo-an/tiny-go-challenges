@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package gpb;
+
+import "rpc_create_user.proto";
+import "rpc_login_user.proto";
+
+option go_package = "github.com/hippo-an/tiny-go-challenges/mombank/gpb";
+
+
+service MomBank {
+  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse){
+
+  }
+
+  rpc LoginUser (LoginUserRequest) returns (LoginUserResponse){
+
+  }
+}

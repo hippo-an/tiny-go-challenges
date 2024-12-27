@@ -1,16 +1,16 @@
 syntax = "proto3";
 
-package pb;
+package gpb;
 
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/hippo-an/tiny-go-challenges/mombank/pb";
+option go_package = "github.com/hippo-an/tiny-go-challenges/mombank/gpb";
 
 message User {
-    int64 ID = 1;
-	string username =2;
-	string full_name = 3;
-    string email = 4;
-    google.protobuf.Timestamp password_changed_at = 5;
-    google.protobuf.Timestamp created_at = 6;
+  int64 ID = 1;
+  string username = 2;
+  string full_name = 3;
+  string email = 4;
+  google.protobuf.Timestamp password_changed_at = 5;
+  google.protobuf.Timestamp created_at = 6;
 }

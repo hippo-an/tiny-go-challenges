@@ -57,14 +57,14 @@ container:
 	@docker container run --name mombank -p 8080:9999 -e GIN_MODE=debug --rm --network mombank-network -e DB_SOURCE="postgresql://root:secret@mom-bank-db:5432/$(DB_NAME)?sslmode=disable" mombank:latest
 
 proto:
-	@rm -f pb/*.go
-	@protoc --go_out=pb --proto_path=proto \
+	@rm -f gpb/*.go
+	@protoc --go_out=gpb --proto_path=proto \
 			--go_opt=paths=source_relative \
-			--go-grpc_out=pb \
+			--go-grpc_out=gpb \
 			--go-grpc_opt=paths=source_relative \
 			./proto/*.proto 
 
 evans:
-	@evans --host localhost --port 9090 -r rep
+	@evans --host localhost --port 9090 -r repl
 
-.PHONY: rundb stopdb createdb dropdb migrateup migratedown sqlc test server mock test-cover mdone muone container proto
+.PHONY: rundb stopdb createdb dropdb migrateup migratedown sqlc test server mock test-cover mdone muone container proto evans
