@@ -5,6 +5,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -16,9 +17,9 @@ func (t *Templates) Render(w io.Writer, name string, data interface{}, c echo.Co
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
-func newTemplates() *Templates {
+func newTemplate() *Templates {
 	return &Templates{
-		templates: template.Must(template.ParseGlob("views/*.tmpl")),
+		templates: template.Must(template.ParseGlob("templates/*.tmpl")),
 	}
 }
 
@@ -30,13 +31,18 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 
-	e.Renderer = newTemplates()
+	e.Renderer = newTemplate()
 
-	count := Count{Count: 0}
+	count := &Count{}
+
 	e.GET("/", func(c echo.Context) error {
-		count.Count++
-		return c.Render(http.StatusOK, "base-index", count)
+		return c.Render(http.StatusOK, "count-index", count)
 	})
 
-	e.Logger.Fatal(e.Start(":42069"))
+	e.POST("/count", func(c echo.Context) error {
+		count.Count++
+		return c.Render(http.StatusOK, "count", count)
+	})
+
+	log.Fatal(e.Start(":8080"))
 }
