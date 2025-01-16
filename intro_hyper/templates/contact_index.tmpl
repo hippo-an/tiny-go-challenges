@@ -1,0 +1,81 @@
+{{block "contact-index" .}}
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+              content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <script src="https://unpkg.com/htmx.org@2.0.4"
+                integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
+                crossorigin="anonymous"></script>
+        <title>Contact</title>
+    </head>
+    <body>
+    {{template "form" .Form}}
+    <hr/>
+    {{template "display" .Data}}
+
+    <script>
+        document.addEventListener("DOMContentLoaded", (event) => {
+            document.body.addEventListener("htmx:beforeSwap", function (evt) {
+                if (evt.detail.xhr.status === 422) {
+                    evt.detail.shouldSwap = true;
+                    evt.detail.isError = false;
+                }
+            });
+        });
+
+
+        document.addEventListener('htmx:afterSwap', function(event) {
+            document.querySelectorAll('.target-class').forEach(el => {
+                el.innerHTML = "새로운 내용";
+            });
+        });
+    </script>
+    </body>
+    </html>
+
+{{end}}
+
+{{block "form" .}}
+    <form hx-post="/contacts"
+          hx-swap="outerHTML">
+        Name: <label for="name">
+            <input type="text" name="name" placeholder="name"
+                    {{if .Values.name}} value="{{.Values.name}}" {{end}}
+            />
+        </label>
+        Email: <label for="email">
+            <input type="text" name="email" placeholder="email"
+                    {{if .Values.email}} value="{{.Values.email}}" {{end}}
+            />
+        </label>
+
+        {{if .Errors.email}}
+            <div style="color: red">{{ .Errors.email }}</div>
+        {{end}}
+
+        <button type="submit">Create Contact</button>
+    </form>
+{{end}}
+
+{{block "display" .}}
+    <div style="display: flex; flex-direction: column" id="contact-list">
+        {{range .Contacts}}
+            {{template "contact" .}}
+        {{end}}
+    </div>
+{{end}}
+
+{{block "contact" .}}
+    <div>
+        Name: <span>{{.Name}}</span>
+        Email: <span>{{.Email}}</span>
+    </div>
+{{end}}
+
+{{block "oob-contact" .}}
+    <div   hx-swap-oob="afterbegin:#contact-list">
+        {{template "contact" .}}
+    </div>
+{{end}}
