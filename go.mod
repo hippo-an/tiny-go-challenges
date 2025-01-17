@@ -1,9 +1,11 @@
 module github.com/hippo-an/tiny-go-challenges
 
-go 1.22.2
+go 1.23
+
+toolchain go1.23.4
 
 require (
-	github.com/a-h/templ v0.2.680
+	github.com/a-h/templ v0.3.819
 	github.com/adrg/frontmatter v0.2.0
 	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/go-chi/chi/v5 v5.0.12
