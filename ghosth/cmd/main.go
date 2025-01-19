@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/hippo-an/tiny-go-challenges/ghosth/internal/server"
-	"github.com/hippo-an/tiny-go-challenges/ghosth/internal/store"
 	"log"
 	"os"
+
+	"github.com/hippo-an/tiny-go-challenges/ghosth/internal/server"
+	"github.com/hippo-an/tiny-go-challenges/ghosth/internal/store"
 )
 
 func main() {
@@ -21,7 +22,7 @@ func main() {
 		logger.Fatalf("Error when creating server: %s", err)
 		os.Exit(1)
 	}
-	if err := srv.Start(); err != nil {
+	if err := srv.StreamStart(); err != nil {
 		logger.Fatalf("Error when starting server: %s", err)
 		os.Exit(1)
 	}

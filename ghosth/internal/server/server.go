@@ -3,14 +3,15 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/hippo-an/tiny-go-challenges/ghosth/internal/store"
-	"github.com/hippo-an/tiny-go-challenges/ghosth/templates"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/hippo-an/tiny-go-challenges/ghosth/internal/store"
+	"github.com/hippo-an/tiny-go-challenges/ghosth/templates"
 )
 
 type GuestStore interface {
