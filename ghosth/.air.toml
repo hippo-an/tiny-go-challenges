@@ -6,8 +6,8 @@ tmp_dir = "tmp"
   args_bin = []
   bin = "./tmp/ghosth"
   cmd = "go build -o ./tmp/ghosth ./cmd/*.go"
-  delay = 1000
-  exclude_dir = ["assets", "tmp", "vendor", "testdata", "node_module"]
+  delay = 100
+  exclude_dir = ["assets", "tmp", "vendor", "testdata", "node_module", "static"]
   exclude_file = []
   exclude_regex = ["_test.go", ".*_templ.go"]
   exclude_unchanged = false
@@ -40,7 +40,7 @@ tmp_dir = "tmp"
   time = false
 
 [misc]
-  clean_on_exit = false
+  clean_on_exit = true
 
 [proxy]
   app_port = 0
