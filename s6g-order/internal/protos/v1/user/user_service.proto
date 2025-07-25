@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+option go_package = "s6g-order/internal/gen/userservice";
+
+service UserService {
+    rpc ValidateUser (ValidateUserRequest) returns (ValidateUserResponse);
+    rpc GetUserById (GetUserByIdRequest) returns (GetUserByIdResponse;
+}
+
+message ValidateUserRequest {
+    string user_id = 1;
+} 
+
+message ValidateUserResponse {
+    bool is_valid = 1;
+}
+
+message GetUserByIdRequest {
+    string user_id = 1;
+}
+
+message User {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+}
+
+message GetUserByIdResponse {
+    User user = 1;
+    bool found = 2;
+}

@@ -1,0 +1,11 @@
+version: "2"
+sql:
+- engine: "postgresql"
+  queries: "../../services/user-service/queries"
+  schema: "../../services/user-service/schema"
+  gen:
+    go:
+      package: "userdb"
+      out: "../../services/user-service/db"
+      sql_package: "pgx/v5"
+ 
