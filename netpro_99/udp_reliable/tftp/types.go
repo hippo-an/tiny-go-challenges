@@ -1,4 +1,4 @@
-package udpreliable
+package tftp
 
 import (
 	"bytes"
@@ -151,7 +151,7 @@ func (d *Data) MarshalBinary() ([]byte, error) {
 
 	// BlockSize 만큼만 쓰기
 	_, err = io.CopyN(b, d.Payload, BlockSize)
-	if err != nil {
+	if err != nil && err != io.EOF {
 		return nil, err
 	}
 
