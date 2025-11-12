@@ -1,0 +1,98 @@
+package httpserver
+
+import (
+	"bytes"
+	"fmt"
+	"html"
+	"io"
+	"net"
+	"net/http"
+	"testing"
+	"time"
+)
+
+func TestSimpleHTTPServer(t *testing.T) {
+	// DefaultServeMux에 핸들러 등록
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			fmt.Fprint(w, "Hello,friend!")
+		case http.MethodPost:
+			body, err := io.ReadAll(r.Body)
+			if err != nil {
+				http.Error(w, "Failed to read body", http.StatusInternalServerError)
+				return
+			}
+			fmt.Fprintf(w, "Hello, %s!", html.EscapeString(string(body)))
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	})
+
+	srv := &http.Server{
+		Addr:              "127.0.0.1:8081",
+		Handler:           http.DefaultServeMux,
+		IdleTimeout:       5 * time.Minute,
+		ReadHeaderTimeout: time.Minute,
+	}
+
+	l, err := net.Listen("tcp", srv.Addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	go func() {
+		err := srv.Serve(l)
+		if err != http.ErrServerClosed {
+			t.Error(err)
+		}
+	}()
+
+	testCases := []struct {
+		method   string
+		body     io.Reader
+		code     int
+		response string
+	}{
+		{http.MethodGet, nil, http.StatusOK, "Hello,friend!"},
+		{http.MethodPost, bytes.NewBufferString("<world>"), http.StatusOK, "Hello, &lt;world&gt;!"},
+		{http.MethodHead, nil, http.StatusMethodNotAllowed, ""},
+	}
+
+	client := new(http.Client)
+	path := fmt.Sprintf("http://%s/", srv.Addr)
+
+	// 테스트 케이스 실행
+	for i, c := range testCases {
+		r, err := http.NewRequest(c.method, path, c.body)
+		if err != nil {
+			t.Errorf("%d: %v", i, err)
+			continue
+		}
+		resp, err := client.Do(r)
+		if err != nil {
+			t.Errorf("%d: %v", i, err)
+			continue
+		}
+
+		if resp.StatusCode != c.code {
+			t.Errorf("%d: unexpected status code: %q", i, resp.Status)
+		}
+
+		b, err := io.ReadAll(resp.Body)
+		if err != nil {
+			t.Errorf("%d: %v", i, err)
+			continue
+		}
+		_ = resp.Body.Close()
+
+		if c.response != string(b) {
+			t.Errorf("%d: expected %q; actual %q", i, c.response, b)
+		}
+	}
+
+	if err := srv.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+}
