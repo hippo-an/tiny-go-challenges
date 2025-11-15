@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -140,7 +139,7 @@ func TestMultiPartPost(t *testing.T) {
 		_ = resp.Body.Close()
 	}()
 
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Fatal(err)
 	}
