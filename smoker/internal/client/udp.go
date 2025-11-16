@@ -6,17 +6,23 @@ import (
 	"time"
 )
 
-// TCPPing performs a TCP ping test to the specified server
+// UDPPing performs a UDP ping test to the specified server
 // Returns latency in milliseconds and any error encountered
-func TCPPing(host string, port int, timeout time.Duration) (int64, error) {
-	address := net.JoinHostPort(host, fmt.Sprintf("%d", port))
+func UDPPing(host string, port int, timeout time.Duration) (int64, error) {
+	address := fmt.Sprintf("%s:%d", host, port)
 	message := []byte("PING")
 
 	// Start timing
 	startTime := time.Now()
 
-	// Connect to the server with timeout
-	conn, err := net.DialTimeout("tcp", address, timeout)
+	// Resolve UDP address
+	udpAddr, err := net.ResolveUDPAddr("udp", address)
+	if err != nil {
+		return 0, fmt.Errorf("address resolution failed: %w", err)
+	}
+
+	// Create UDP connection
+	conn, err := net.DialUDP("udp", nil, udpAddr)
 	if err != nil {
 		return 0, fmt.Errorf("connection failed: %w", err)
 	}
