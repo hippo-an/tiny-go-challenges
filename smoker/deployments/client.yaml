@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: smoker-client
+  labels:
+    app: smoker-client
+spec:
+  selector:
+    matchLabels:
+      app: smoker-client
+  template:
+    metadata:
+      labels:
+        app: smoker-client
+    spec:
+      containers:
+        - name: smoker-client
+          image: smoker-client:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SERVER_HOST
+              value: "smoker-server"
+            - name: TCP_PORT
+              value: "8080"
+            - name: UDP_PORT
+              value: "8081"
+            - name: HTTP_PORT
+              value: "8082"
+            - name: TEST_INTERVAL
+              value: "30"
+            - name: TEST_TIMEOUT
+              value: "5"
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+      tolerations:
+        - operator: Exists
