@@ -1,0 +1,83 @@
+.PHONY: help dev build test clean setup watch-air watch-templ watch-tailwind sqlc-generate templ-generate
+
+# Default target
+help:
+	@echo "{{.Name}} - Development Commands"
+	@echo ""
+	@echo "Usage:"
+	@echo "  make dev              Start all development watchers (air + templ + tailwind)"
+	@echo "  make build            Build for production"
+	@echo "  make test             Run tests"
+	@echo "  make setup            Install all dependencies"
+	@echo "  make clean            Clean build artifacts"
+	@echo ""
+	@echo "Individual watchers:"
+	@echo "  make watch-air        Start Go hot reload (air)"
+	@echo "  make watch-templ      Start templ watcher"
+	@echo "  make watch-tailwind   Start Tailwind CSS watcher"
+	@echo ""
+	@echo "Code generation:"
+	@echo "  make sqlc-generate    Generate sqlc code"
+	@echo "  make templ-generate   Generate templ code"
+
+# Development - run all watchers in parallel
+dev:
+	@echo "Starting development environment..."
+	@make -j3 watch-air watch-templ watch-tailwind
+
+# Go hot reload with air
+watch-air:
+	air -c .air.toml
+
+# templ file watcher
+watch-templ:
+	templ generate --watch --proxy="http://localhost:8080" --open-browser=false
+
+# Tailwind CSS watcher
+watch-tailwind:
+	npx tailwindcss -i ./web/tailwind/input.css -o ./web/static/css/output.css --watch
+
+# Setup - install all dependencies
+setup:
+	@echo "Installing Go dependencies..."
+	go mod download
+	go mod tidy
+	@echo "Installing npm dependencies..."
+	npm install
+	@echo "Installing development tools..."
+	go install github.com/air-verse/air@latest
+	go install github.com/a-h/templ/cmd/templ@latest
+{{- if ne .Database "none"}}
+	go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+{{- end}}
+	@echo "Setup complete!"
+
+# Generate sqlc code
+{{- if ne .Database "none"}}
+sqlc-generate:
+	sqlc generate
+{{- else}}
+sqlc-generate:
+	@echo "Database not configured"
+{{- end}}
+
+# Generate templ code
+templ-generate:
+	templ generate
+
+# Build for production
+build: templ-generate
+	@echo "Building for production..."
+	CGO_ENABLED=0 go build -ldflags="-s -w" -o bin/server ./cmd/server
+	@echo "Build complete: bin/server"
+
+# Run tests
+test:
+	go test -v -race ./...
+
+# Clean build artifacts
+clean:
+	rm -rf bin/
+	rm -rf tmp/
+	rm -f web/static/css/output.css
+	find . -name "*_templ.go" -delete

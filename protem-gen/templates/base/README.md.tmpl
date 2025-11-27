@@ -1,0 +1,102 @@
+# {{.Name}}
+
+A Go web application generated with [protem-gen](https://github.com/hippo-an/tiny-go-challenges/protem-gen).
+
+## Tech Stack
+
+- **Framework**: {{.Framework}}
+- **Database**: {{if eq .Database "none"}}None{{else}}{{.Database}}{{end}}
+- **Templating**: templ
+- **CSS**: Tailwind CSS
+- **Interactivity**: htmx + Alpine.js
+
+## Quick Start
+
+### Prerequisites
+
+- Go 1.23+
+- Node.js 18+
+- Make
+
+### Setup
+
+```bash
+# Install dependencies
+make setup
+
+# Start development server
+make dev
+```
+
+Open [http://localhost:8080](http://localhost:8080) in your browser.
+
+## Development
+
+### Available Commands
+
+```bash
+make dev              # Start all watchers (air + templ + tailwind)
+make build            # Build for production
+make test             # Run tests
+make setup            # Install dependencies
+make clean            # Clean build artifacts
+```
+
+### Individual Watchers
+
+```bash
+make watch-air        # Go hot reload
+make watch-templ      # templ file watcher
+make watch-tailwind   # Tailwind CSS watcher
+```
+
+### Code Generation
+
+```bash
+make templ-generate   # Generate templ code
+{{- if ne .Database "none"}}
+make sqlc-generate    # Generate sqlc code
+{{- end}}
+```
+
+## Project Structure
+
+```
+{{.Name}}/
+├── cmd/
+│   └── server/           # Application entrypoint
+├── internal/
+│   ├── domain/           # Business entities
+│   ├── application/      # Use cases / services
+│   ├── infrastructure/   # External systems (DB, HTTP)
+│   └── interfaces/       # Handlers / controllers
+├── web/
+│   ├── templates/        # templ files
+│   ├── static/           # Static assets
+│   └── tailwind/         # Tailwind config
+{{- if ne .Database "none"}}
+├── migrations/           # Database migrations
+├── sqlc/                 # sqlc queries
+{{- end}}
+└── Makefile
+```
+
+## Architecture
+
+This project follows **Clean Architecture** principles:
+
+1. **Domain Layer**: Core business logic and entities
+2. **Application Layer**: Use cases and business rules
+3. **Infrastructure Layer**: External concerns (database, HTTP server)
+4. **Interface Layer**: Request handlers and presenters
+
+## Production Build
+
+```bash
+make build
+./bin/server
+```
+
+## License
+
+MIT

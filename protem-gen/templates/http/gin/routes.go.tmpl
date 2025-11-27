@@ -1,0 +1,27 @@
+package http
+
+import (
+	"github.com/gin-gonic/gin"
+)
+
+// SetupRoutes configures all application routes
+func SetupRoutes(r *gin.Engine) {
+	// Serve static files
+	r.Static("/static", "./web/static")
+
+	// Health check
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "ok"})
+	})
+
+	// Pages
+	r.GET("/", HomeHandler)
+
+	// API routes
+	api := r.Group("/api")
+	{
+		api.GET("/ping", func(c *gin.Context) {
+			c.JSON(200, gin.H{"message": "pong"})
+		})
+	}
+}

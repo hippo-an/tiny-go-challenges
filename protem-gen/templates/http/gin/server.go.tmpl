@@ -1,0 +1,30 @@
+package http
+
+import (
+	"github.com/gin-gonic/gin"
+	"{{.ModulePath}}/internal/interfaces/http"
+)
+
+// Server represents the HTTP server
+type Server struct {
+	port   string
+	router *gin.Engine
+}
+
+// NewServer creates a new HTTP server
+func NewServer(port string) *Server {
+	router := gin.Default()
+
+	// Setup routes
+	http.SetupRoutes(router)
+
+	return &Server{
+		port:   port,
+		router: router,
+	}
+}
+
+// Start starts the HTTP server
+func (s *Server) Start() error {
+	return s.router.Run(":" + s.port)
+}
