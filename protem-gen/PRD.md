@@ -1,7 +1,7 @@
 # protem-gen: Product Requirements Document
 
-> **Version**: 1.0.0
-> **Status**: Draft
+> **Version**: 2.0.0
+> **Status**: Implemented - Phase 1 Complete
 > **Last Updated**: 2025-11-27
 
 ---
@@ -47,11 +47,13 @@
 |----|------|-----|--------|----------|
 | FR-010 | Project Name | string | 필수 입력 | P0 |
 | FR-011 | Module Path | string | github.com/user/name | P0 |
-| FR-012 | HTTP Framework | echo, chi, fiber, stdlib | echo | P0 |
+| FR-012 | HTTP Framework | gin (고정) | gin | P0 |
 | FR-013 | Database | postgres, mysql, sqlite, none | postgres | P0 |
 | FR-014 | Include gRPC | boolean | false | P1 |
 | FR-015 | Include Auth | boolean | false | P2 |
 | FR-016 | Include AI Ready | boolean | false | P2 |
+
+> **Note**: HTTP Framework는 Gin으로 고정됨. 향후 버전에서 추가 프레임워크 지원 예정
 
 ### 3.3 생성되는 프로젝트 기능
 
@@ -160,17 +162,31 @@ $ protem-gen create
 
 ? Project name: my-app
 ? Module path: github.com/myuser/my-app
-? HTTP framework: [echo]
 ? Database: [postgres]
 ? Include gRPC support? [N]
 
-Creating project...
-✓ Created directory structure
-✓ Generated configuration files
-✓ Initialized Go module
-✓ Setup npm dependencies
+Creating project: my-app
 
-Project created at ./my-app
+Checking required tools...
+  ✓ go (go1.23.0)
+  ✓ npm (10.2.0)
+  ✓ air (v1.61.0)
+  ✓ templ (v0.3.865)
+
+Creating directory structure...
+Initializing project...
+  go mod init github.com/myuser/my-app
+  npm init
+  npm install [tailwindcss @tailwindcss/forms @tailwindcss/typography]
+  air init
+  npx tailwindcss init
+Configuring project files...
+Generating source files...
+Installing dependencies...
+  go get [github.com/gin-gonic/gin github.com/a-h/templ github.com/jackc/pgx/v5]
+  go mod tidy
+
+✓ Project 'my-app' created successfully!
 
 Next steps:
   cd my-app
@@ -217,15 +233,15 @@ make dev      # 핫 리로드 개발 서버 시작
 
 | Component | Technology | Version |
 |-----------|------------|---------|
-| Language | Go | 1.22+ |
-| HTTP Framework | Echo/Chi/Fiber | latest stable |
-| Templating | templ | v0.2.x |
+| Language | Go | 1.23+ |
+| HTTP Framework | Gin | v1.11.0 |
+| Templating | templ | v0.3.x |
 | CSS | Tailwind CSS | v3.4.x |
 | Interactivity | htmx | v2.0.x |
 | Client State | Alpine.js | v3.x |
 | Database | PostgreSQL/MySQL/SQLite | - |
-| SQL Codegen | sqlc | v1.27.x |
-| Hot Reload | air | v1.61.x |
+| SQL Codegen | sqlc | v1.30.x |
+| Hot Reload | air | latest |
 
 ---
 
@@ -268,10 +284,10 @@ make dev      # 핫 리로드 개발 서버 시작
 
 | Dependency | Purpose | Risk Level |
 |------------|---------|------------|
-| labstack/echo | HTTP framework | Low |
+| gin-gonic/gin | HTTP framework | Low |
 | a-h/templ | Templating | Medium |
 | sqlc-dev/sqlc | SQL codegen | Low |
-| cosmtrek/air | Hot reload | Low |
+| air-verse/air | Hot reload | Low |
 
 ---
 
@@ -314,7 +330,6 @@ protem-gen create
 protem-gen create \
   --name my-app \
   --module github.com/user/my-app \
-  --framework echo \
   --database postgres \
   --grpc=false
 ```

@@ -2,9 +2,9 @@
 
 ## Implementation Plan
 
-> **Document Version**: 1.2.0
+> **Document Version**: 2.0.0
 > **Last Updated**: 2025-11-27
-> **Status**: Draft - Pending Review
+> **Status**: Implemented - Phase 1 Complete
 
 ---
 
@@ -74,76 +74,41 @@ protem-gen create
 
 ### ADR-003: Generated Project HTTP Framework
 
-**결정**: `Gin` 프레임워크 기본값 (옵션으로 `Echo`, `Chi`, `Fiber` 제공)
+**결정**: `Gin` 프레임워크 고정 (단일 프레임워크 지원)
 
-#### 프레임워크 비교 분석 (2025년 기준)
-
-**GitHub Stars & 커뮤니티**:
-| Framework | GitHub Stars | 첫 릴리즈 | 최근 활동 |
-|-----------|--------------|-----------|-----------|
-| **Gin** | 81k+ | 2014 | 활발 |
-| **Echo** | 30k+ | 2015 | 활발 |
-| **Fiber** | 35k+ | 2020 | 매우 활발 |
-| **Chi** | 19k+ | 2016 | 활발 |
-
-**성능 벤치마크** (Go 1.23.5, MacBook Pro M2 기준):
-| Framework | Requests/sec | Latency (p99) | 메모리 사용량 |
-|-----------|--------------|---------------|---------------|
-| **Fiber** | 최고 | 최저 | 낮음 |
-| **Echo** | 우수 | 낮음 | 낮음 |
-| **Gin** | 우수 | 낮음 | 낮음 |
-| **Chi** | 우수 | 낮음 | 최저 |
-
-> **참고**: 2025년 벤치마크에서 실제 워크로드(DB 연동, JSON 처리, 미들웨어 체인) 테스트 시 프레임워크 간 성능 차이는 미미함
-
-**기능 비교**:
-| Feature | Gin | Echo | Fiber | Chi |
-|---------|-----|------|-------|-----|
-| HTTP/2 지원 | ✅ | ✅ | ✅ | ✅ |
-| WebSocket | ✅ | ✅ | ✅ (내장) | 외부 |
-| 미들웨어 생태계 | 풍부 | 풍부 | 풍부 | 표준 호환 |
-| JSON 검증 | 내장 | 내장 | 내장 | 외부 |
-| 라우트 그룹화 | ✅ | ✅ | ✅ | ✅ |
-| net/http 호환 | ✅ | ✅ | ❌ (fasthttp) | ✅ |
-| 자동 TLS | ✅ | ✅ | ✅ | 외부 |
-
-**상세 분석**:
-
-| Framework | 장점 | 단점 | 적합한 상황 |
-|-----------|------|------|-------------|
-| **Gin** | • 가장 큰 커뮤니티 (81k stars)<br>• 풍부한 문서/튜토리얼<br>• Martini 대비 40x 빠름<br>• 안정적인 API | • 기능이 미니멀<br>• 추가 라이브러리 필요할 수 있음 | API, 마이크로서비스, 입문자 |
-| **Echo** | • 타입 안전성 강조<br>• 깔끔한 API 설계<br>• 중앙 집중 에러 처리<br>• 다양한 템플릿 엔진 지원 | • 학습 곡선 약간 높음<br>• Gin보다 작은 커뮤니티 | 엔터프라이즈, API 게이트웨이 |
-| **Fiber** | • 최고 성능 (fasthttp 기반)<br>• Express.js 스타일 API<br>• Node.js 개발자 친화적<br>• 내장 Rate Limiting | • net/http 비호환<br>• 일부 라이브러리 호환 문제<br>• 상대적으로 신생 | 고성능 요구, Node.js 전환자 |
-| **Chi** | • 가장 가벼움<br>• net/http 완전 호환<br>• 표준 라이브러리 철학<br>• 컴포저블 설계 | • 내장 기능 최소<br>• 많은 외부 의존성 필요 | 미니멀리스트, stdlib 선호자 |
-
-**권장 선택 가이드**:
-
-```
-사용 케이스별 권장 프레임워크:
-
-┌─────────────────────────────────┬──────────────┐
-│ 사용 케이스                      │ 권장         │
-├─────────────────────────────────┼──────────────┤
-│ 일반 웹 API / 마이크로서비스      │ Gin (기본값)  │
-│ 엔터프라이즈 / 대규모 팀          │ Echo         │
-│ 최고 성능 요구 / Node.js 전환    │ Fiber        │
-│ stdlib 호환성 / 미니멀 설계       │ Chi          │
-└─────────────────────────────────┴──────────────┘
-```
-
-**최종 결정: `Gin` 기본값 선택 근거**:
+**근거**:
 1. **커뮤니티 규모**: 81k+ stars로 압도적 1위, 문제 해결 리소스 풍부
 2. **생태계**: 가장 많은 미들웨어, 플러그인, 예제 코드 존재
 3. **안정성**: 10년+ 역사, 프로덕션 검증 완료
 4. **학습 용이성**: 초보자도 빠르게 습득 가능
-5. **성능**: 실제 워크로드에서 충분한 성능 (프레임워크 간 차이 미미)
+5. **유지보수 단순화**: 단일 프레임워크 지원으로 코드 복잡도 감소
 
-> **참고 자료**:
-> - [LogRocket: Top Go Frameworks 2025](https://blog.logrocket.com/top-go-frameworks-2025/)
-> - [Tech Tonic: Go Framework Performance 2025](https://medium.com/deno-the-complete-reference/go-the-fastest-web-framework-in-2025-dfa2ddfd09e9)
-> - [Fiber Benchmarks](https://docs.gofiber.io/extra/benchmarks/)
+> **v2 계획**: 향후 버전에서 Echo, Chi 등 추가 프레임워크 지원 검토
 
-### ADR-004: Project Structure Pattern
+### ADR-004: CLI 실행 기반 프로젝트 초기화
+
+**결정**: 정적 템플릿 대신 실제 CLI 명령어 실행으로 프로젝트 초기화
+
+**근거**:
+- 라이브러리 업데이트 시 자동으로 최신 기본값 반영
+- 템플릿 유지보수 부담 감소
+- 실제 도구의 기본 설정 활용
+
+**CLI 실행 대상**:
+| 도구 | 명령어 | 결과물 |
+|------|--------|--------|
+| Go | `go mod init <module>` | go.mod |
+| npm | `npm init -y` | package.json |
+| npm | `npm install tailwindcss -D` | node_modules |
+| air | `air init` | .air.toml |
+| tailwindcss | `npx tailwindcss init` | tailwind.config.js |
+
+**템플릿 유지 대상**:
+- Makefile, README.md, .gitignore (CLI 대안 없음)
+- Go 소스 코드 (프레임워크별 커스텀 필요)
+- templ 파일 (프로젝트별 커스텀 필요)
+
+### ADR-005: Project Structure Pattern
 
 **결정**: Clean Architecture + Domain-Driven Directory Layout
 
@@ -247,12 +212,12 @@ protem-gen/
 type ProjectConfig struct {
     Name        string   // 프로젝트 이름
     ModulePath  string   // Go 모듈 경로
-    Framework   string   // echo, chi, fiber, stdlib
     Database    string   // postgres, mysql, sqlite, none
     IncludeGRPC bool     // gRPC 포함 여부
     IncludeAuth bool     // 인증 보일러플레이트
     IncludeAI   bool     // AI 통합 준비 코드
 }
+// Note: Framework is fixed to Gin, not configurable
 ```
 
 **완료 기준**:
@@ -279,12 +244,10 @@ templates/
 │       └── server/
 │           └── main.go.tmpl
 ├── http/
-│   ├── echo/
-│   │   └── server.go.tmpl
-│   ├── chi/
-│   │   └── server.go.tmpl
-│   └── fiber/
-│       └── server.go.tmpl
+│   └── gin/
+│       ├── server.go.tmpl
+│       ├── routes.go.tmpl
+│       └── handler.go.tmpl
 ├── architecture/
 │   ├── domain/
 │   │   └── user.go.tmpl
@@ -601,36 +564,30 @@ require (
 ### 의존성 버전 (생성될 프로젝트)
 
 ```go
-// 생성될 go.mod - HTTP 프레임워크 선택에 따라 변경
+// 생성될 go.mod - go mod init 및 go get으로 자동 생성
 require (
-    // HTTP 프레임워크 (택1)
-    github.com/gin-gonic/gin v1.11.0          // 기본값
-    // github.com/labstack/echo/v4 v4.13.4    // 옵션
-    // github.com/go-chi/chi/v5 v5.2.0        // 옵션
-    // github.com/gofiber/fiber/v2 v2.52.6    // 옵션 (net/http 비호환)
+    // HTTP 프레임워크 (Gin 고정)
+    github.com/gin-gonic/gin v1.11.0
 
     // 템플릿 & 프론트엔드
     github.com/a-h/templ v0.3.865             // HTML 템플릿 (Go)
 
-    // 데이터베이스
+    // 데이터베이스 (선택)
     github.com/jackc/pgx/v5 v5.7.5            // PostgreSQL
     // github.com/go-sql-driver/mysql v1.8.1  // MySQL (옵션)
     // modernc.org/sqlite v1.34.5             // SQLite (옵션)
 )
 
-// 개발 도구 (go install)
+// 개발 도구 (go install) - 필수 도구, 없으면 에러
 // github.com/air-verse/air@latest            // Go 핫 리로드
-// github.com/a-h/templ/cmd/templ@v0.3.865    // templ CLI
-// github.com/sqlc-dev/sqlc/cmd/sqlc@v1.30.0  // SQL 코드 생성
+// github.com/a-h/templ/cmd/templ@latest      // templ CLI
+// github.com/sqlc-dev/sqlc/cmd/sqlc@latest   // SQL 코드 생성
 ```
 
 | 패키지 | 버전 | 용도 | 비고 |
 |--------|------|------|------|
 | **HTTP 프레임워크** |
-| gin-gonic/gin | v1.11.0 | HTTP 프레임워크 | 기본값, Go 1.23+ |
-| labstack/echo/v4 | v4.13.4 | HTTP 프레임워크 | 옵션 |
-| go-chi/chi/v5 | v5.2.0 | HTTP 라우터 | 옵션, stdlib 호환 |
-| gofiber/fiber/v2 | v2.52.6 | HTTP 프레임워크 | 옵션, v3는 베타 |
+| gin-gonic/gin | v1.11.0 | HTTP 프레임워크 | 고정, Go 1.23+ |
 | **템플릿** |
 | a-h/templ | v0.3.865 | HTML 템플릿 | |
 | **데이터베이스** |
@@ -729,6 +686,7 @@ require (
 
 | Version | Date | Changes | Author |
 |---------|------|---------|--------|
+| 2.0.0 | 2025-11-27 | **Breaking**: Gin 단일 프레임워크 지원, CLI 실행 기반 프로젝트 초기화 (ADR-004), Chi/Fiber/Echo 제거 | AI Assistant |
 | 1.2.0 | 2025-11-27 | Technical Specifications 전면 업데이트: 최신 안정화 버전 반영, 버전 선택 근거 추가 | AI Assistant |
 | 1.1.0 | 2025-11-27 | ADR-003 확장: Gin 추가 및 4개 프레임워크 상세 비교 분석 | AI Assistant |
 | 1.0.0 | 2025-11-27 | Initial draft | AI Assistant |

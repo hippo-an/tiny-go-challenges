@@ -1,15 +1,5 @@
 package config
 
-// Framework represents the HTTP framework choice
-type Framework string
-
-const (
-	FrameworkGin   Framework = "gin"
-	FrameworkEcho  Framework = "echo"
-	FrameworkChi   Framework = "chi"
-	FrameworkFiber Framework = "fiber"
-)
-
 // Database represents the database choice
 type Database string
 
@@ -27,9 +17,6 @@ type ProjectConfig struct {
 	ModulePath string `json:"module_path"`
 	OutputDir  string `json:"output_dir"`
 
-	// HTTP framework selection
-	Framework Framework `json:"framework"`
-
 	// Database configuration
 	Database Database `json:"database"`
 
@@ -46,7 +33,6 @@ type ProjectConfig struct {
 // NewDefaultConfig returns a ProjectConfig with sensible defaults
 func NewDefaultConfig() *ProjectConfig {
 	return &ProjectConfig{
-		Framework:     FrameworkGin,
 		Database:      DatabasePostgres,
 		IncludeGRPC:   false,
 		IncludeAuth:   false,
@@ -65,16 +51,6 @@ func (c *ProjectConfig) Validate() error {
 		return ErrModulePathRequired
 	}
 	return nil
-}
-
-// FrameworkOptions returns available framework options
-func FrameworkOptions() []Framework {
-	return []Framework{
-		FrameworkGin,
-		FrameworkEcho,
-		FrameworkChi,
-		FrameworkFiber,
-	}
 }
 
 // DatabaseOptions returns available database options

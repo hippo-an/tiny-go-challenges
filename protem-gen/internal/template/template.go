@@ -36,8 +36,7 @@ func NewEngine() *Engine {
 			"hasDB": func(cfg *config.ProjectConfig) bool {
 				return cfg.Database != config.DatabaseNone
 			},
-			"frameworkImport": frameworkImport,
-			"databaseImport":  databaseImport,
+			"databaseImport": databaseImport,
 		},
 	}
 }
@@ -63,17 +62,6 @@ func (e *Engine) Render(templatePath string, cfg *config.ProjectConfig) (string,
 	}
 
 	return buf.String(), nil
-}
-
-// frameworkImport returns the import path for the selected framework
-func frameworkImport(framework config.Framework) string {
-	imports := map[config.Framework]string{
-		config.FrameworkGin:   "github.com/gin-gonic/gin",
-		config.FrameworkEcho:  "github.com/labstack/echo/v4",
-		config.FrameworkChi:   "github.com/go-chi/chi/v5",
-		config.FrameworkFiber: "github.com/gofiber/fiber/v2",
-	}
-	return imports[framework]
 }
 
 // databaseImport returns the import path for the selected database driver

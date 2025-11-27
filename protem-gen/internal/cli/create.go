@@ -13,13 +13,12 @@ import (
 )
 
 var (
-	flagName       string
-	flagModule     string
-	flagFramework  string
-	flagDatabase   string
-	flagGRPC       bool
-	flagAuth       bool
-	flagAI         bool
+	flagName           string
+	flagModule         string
+	flagDatabase       string
+	flagGRPC           bool
+	flagAuth           bool
+	flagAI             bool
 	flagNonInteractive bool
 )
 
@@ -30,20 +29,20 @@ var createCmd = &cobra.Command{
 
 This command will guide you through setting up:
   - Project name and Go module path
-  - HTTP framework (Gin, Echo, Chi, Fiber)
   - Database (PostgreSQL, MySQL, SQLite, or none)
   - Optional features (gRPC, Auth boilerplate, AI integration)
 
+The generated project uses Gin as the HTTP framework.
+
 Example:
   protem-gen create
-  protem-gen create --name my-app --framework gin --database postgres`,
+  protem-gen create --name my-app --database postgres`,
 	RunE: runCreate,
 }
 
 func init() {
 	createCmd.Flags().StringVarP(&flagName, "name", "n", "", "Project name")
 	createCmd.Flags().StringVarP(&flagModule, "module", "m", "", "Go module path (e.g., github.com/user/project)")
-	createCmd.Flags().StringVarP(&flagFramework, "framework", "f", "gin", "HTTP framework: gin, echo, chi, fiber")
 	createCmd.Flags().StringVarP(&flagDatabase, "database", "d", "postgres", "Database: postgres, mysql, sqlite, none")
 	createCmd.Flags().BoolVar(&flagGRPC, "grpc", false, "Include gRPC support")
 	createCmd.Flags().BoolVar(&flagAuth, "auth", false, "Include authentication boilerplate")
@@ -99,7 +98,6 @@ func buildConfigFromFlags() *config.ProjectConfig {
 	cfg := config.NewDefaultConfig()
 	cfg.Name = flagName
 	cfg.ModulePath = flagModule
-	cfg.Framework = config.Framework(flagFramework)
 	cfg.Database = config.Database(flagDatabase)
 	cfg.IncludeGRPC = flagGRPC
 	cfg.IncludeAuth = flagAuth

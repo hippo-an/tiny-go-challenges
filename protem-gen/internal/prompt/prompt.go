@@ -16,7 +16,6 @@ type Step int
 const (
 	StepName Step = iota
 	StepModule
-	StepFramework
 	StepDatabase
 	StepFeatures
 	StepConfirm
@@ -34,10 +33,9 @@ type Model struct {
 	moduleInput textinput.Model
 
 	// Selection states
-	frameworkIdx int
-	databaseIdx  int
-	featureIdx   int
-	features     []bool // [grpc, auth, ai]
+	databaseIdx int
+	featureIdx  int
+	features    []bool // [grpc, auth, ai]
 
 	// UI state
 	width  int
@@ -168,14 +166,8 @@ func (m Model) handleEnter() (tea.Model, tea.Cmd) {
 		}
 		m.Config.ModulePath = m.moduleInput.Value()
 		m.err = nil
-		m.step = StepFramework
-		m.moduleInput.Blur()
-		return m, nil
-
-	case StepFramework:
-		frameworks := config.FrameworkOptions()
-		m.Config.Framework = frameworks[m.frameworkIdx]
 		m.step = StepDatabase
+		m.moduleInput.Blur()
 		return m, nil
 
 	case StepDatabase:
@@ -201,10 +193,6 @@ func (m Model) handleEnter() (tea.Model, tea.Cmd) {
 
 func (m Model) handleUp() (tea.Model, tea.Cmd) {
 	switch m.step {
-	case StepFramework:
-		if m.frameworkIdx > 0 {
-			m.frameworkIdx--
-		}
 	case StepDatabase:
 		if m.databaseIdx > 0 {
 			m.databaseIdx--
@@ -219,10 +207,6 @@ func (m Model) handleUp() (tea.Model, tea.Cmd) {
 
 func (m Model) handleDown() (tea.Model, tea.Cmd) {
 	switch m.step {
-	case StepFramework:
-		if m.frameworkIdx < len(config.FrameworkOptions())-1 {
-			m.frameworkIdx++
-		}
 	case StepDatabase:
 		if m.databaseIdx < len(config.DatabaseOptions())-1 {
 			m.databaseIdx++
@@ -259,8 +243,6 @@ func (m Model) View() string {
 		b.WriteString(m.viewNameStep())
 	case StepModule:
 		b.WriteString(m.viewModuleStep())
-	case StepFramework:
-		b.WriteString(m.viewFrameworkStep())
 	case StepDatabase:
 		b.WriteString(m.viewDatabaseStep())
 	case StepFeatures:
@@ -299,40 +281,10 @@ func (m Model) viewModuleStep() string {
 	return b.String()
 }
 
-func (m Model) viewFrameworkStep() string {
+func (m Model) viewDatabaseStep() string {
 	var b strings.Builder
 	b.WriteString(fmt.Sprintf("Project: %s\n", selectedStyle.Render(m.Config.Name)))
 	b.WriteString(fmt.Sprintf("Module:  %s\n\n", selectedStyle.Render(m.Config.ModulePath)))
-	b.WriteString("Select HTTP framework:\n\n")
-
-	frameworks := []struct {
-		name string
-		desc string
-	}{
-		{"gin", "Most popular, great ecosystem (81k+ stars)"},
-		{"echo", "Type-safe, enterprise-ready"},
-		{"chi", "Lightweight, stdlib compatible"},
-		{"fiber", "Fastest, Express.js style"},
-	}
-
-	for i, fw := range frameworks {
-		cursor := "  "
-		style := blurredStyle
-		if i == m.frameworkIdx {
-			cursor = "> "
-			style = selectedStyle
-		}
-		b.WriteString(fmt.Sprintf("%s%s - %s\n", cursor, style.Render(fw.name), fw.desc))
-	}
-
-	return b.String()
-}
-
-func (m Model) viewDatabaseStep() string {
-	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Project:   %s\n", selectedStyle.Render(m.Config.Name)))
-	b.WriteString(fmt.Sprintf("Module:    %s\n", selectedStyle.Render(m.Config.ModulePath)))
-	b.WriteString(fmt.Sprintf("Framework: %s\n\n", selectedStyle.Render(string(m.Config.Framework))))
 	b.WriteString("Select database:\n\n")
 
 	databases := []struct {
@@ -360,10 +312,9 @@ func (m Model) viewDatabaseStep() string {
 
 func (m Model) viewFeaturesStep() string {
 	var b strings.Builder
-	b.WriteString(fmt.Sprintf("Project:   %s\n", selectedStyle.Render(m.Config.Name)))
-	b.WriteString(fmt.Sprintf("Module:    %s\n", selectedStyle.Render(m.Config.ModulePath)))
-	b.WriteString(fmt.Sprintf("Framework: %s\n", selectedStyle.Render(string(m.Config.Framework))))
-	b.WriteString(fmt.Sprintf("Database:  %s\n\n", selectedStyle.Render(string(m.Config.Database))))
+	b.WriteString(fmt.Sprintf("Project:  %s\n", selectedStyle.Render(m.Config.Name)))
+	b.WriteString(fmt.Sprintf("Module:   %s\n", selectedStyle.Render(m.Config.ModulePath)))
+	b.WriteString(fmt.Sprintf("Database: %s\n\n", selectedStyle.Render(string(m.Config.Database))))
 	b.WriteString("Select optional features (Space to toggle):\n\n")
 
 	features := []struct {
@@ -397,10 +348,9 @@ func (m Model) viewFeaturesStep() string {
 func (m Model) viewConfirmStep() string {
 	var b strings.Builder
 	b.WriteString("Configuration Summary:\n\n")
-	b.WriteString(fmt.Sprintf("  Project:   %s\n", selectedStyle.Render(m.Config.Name)))
-	b.WriteString(fmt.Sprintf("  Module:    %s\n", selectedStyle.Render(m.Config.ModulePath)))
-	b.WriteString(fmt.Sprintf("  Framework: %s\n", selectedStyle.Render(string(m.Config.Framework))))
-	b.WriteString(fmt.Sprintf("  Database:  %s\n", selectedStyle.Render(string(m.Config.Database))))
+	b.WriteString(fmt.Sprintf("  Project:  %s\n", selectedStyle.Render(m.Config.Name)))
+	b.WriteString(fmt.Sprintf("  Module:   %s\n", selectedStyle.Render(m.Config.ModulePath)))
+	b.WriteString(fmt.Sprintf("  Database: %s\n", selectedStyle.Render(string(m.Config.Database))))
 
 	var features []string
 	if m.features[0] {
