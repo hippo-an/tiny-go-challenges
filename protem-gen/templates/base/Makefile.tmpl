@@ -33,9 +33,9 @@ watch-air:
 watch-templ:
 	templ generate --watch --proxy="http://localhost:8080" --open-browser=false
 
-# Tailwind CSS watcher
+# Tailwind CSS watcher (v4 uses @tailwindcss/cli)
 watch-tailwind:
-	npx tailwindcss -i ./web/tailwind/input.css -o ./web/static/css/output.css --watch
+	npx @tailwindcss/cli -i ./web/tailwind/input.css -o ./web/static/css/output.css --watch
 
 # Setup - install all dependencies
 setup:

@@ -1,8 +1,8 @@
 # protem-gen: Product Requirements Document
 
-> **Version**: 2.0.0
+> **Version**: 2.1.0
 > **Status**: Implemented - Phase 1 Complete
-> **Last Updated**: 2025-11-27
+> **Last Updated**: 2025-11-28
 
 ---
 
@@ -131,8 +131,7 @@
 │   ├── static/
 │   │   └── css/
 │   └── tailwind/
-│       ├── input.css
-│       └── tailwind.config.js
+│       └── input.css            # Tailwind v4 CSS-first 설정
 ├── migrations/                  # DB 마이그레이션
 ├── sqlc/
 │   ├── sqlc.yaml
@@ -177,9 +176,8 @@ Creating directory structure...
 Initializing project...
   go mod init github.com/myuser/my-app
   npm init
-  npm install [tailwindcss @tailwindcss/forms @tailwindcss/typography]
+  npm install [tailwindcss @tailwindcss/cli]
   air init
-  npx tailwindcss init
 Configuring project files...
 Generating source files...
 Installing dependencies...
@@ -236,7 +234,7 @@ make dev      # 핫 리로드 개발 서버 시작
 | Language | Go | 1.23+ |
 | HTTP Framework | Gin | v1.11.0 |
 | Templating | templ | v0.3.x |
-| CSS | Tailwind CSS | v3.4.x |
+| CSS | Tailwind CSS | v4.x |
 | Interactivity | htmx | v2.0.x |
 | Client State | Alpine.js | v3.x |
 | Database | PostgreSQL/MySQL/SQLite | - |

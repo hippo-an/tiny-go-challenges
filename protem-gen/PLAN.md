@@ -2,9 +2,9 @@
 
 ## Implementation Plan
 
-> **Document Version**: 2.0.0
-> **Last Updated**: 2025-11-27
-> **Status**: Implemented - Phase 1 Complete
+> **Document Version**: 2.1.0
+> **Last Updated**: 2025-11-28
+> **Status**: Implemented - Phase 1 Complete (Tailwind CSS v4 지원)
 
 ---
 
@@ -99,9 +99,10 @@ protem-gen create
 |------|--------|--------|
 | Go | `go mod init <module>` | go.mod |
 | npm | `npm init -y` | package.json |
-| npm | `npm install tailwindcss -D` | node_modules |
+| npm | `npm install tailwindcss @tailwindcss/cli -D` | node_modules |
 | air | `air init` | .air.toml |
-| tailwindcss | `npx tailwindcss init` | tailwind.config.js |
+
+> **Note**: Tailwind CSS v4는 `tailwindcss init` 명령어가 제거되었습니다. 대신 CSS-first 설정 방식을 사용합니다.
 
 **템플릿 유지 대상**:
 - Makefile, README.md, .gitignore (CLI 대안 없음)
@@ -155,9 +156,9 @@ generated-project/
 | 0.4 | 개발 환경 설정 | P0 |
 
 **완료 기준**:
-- [ ] PLAN.md 승인
-- [ ] PRD.md 승인
-- [ ] go.mod 의존성 정의
+- [x] PLAN.md 승인
+- [x] PRD.md 승인
+- [x] go.mod 의존성 정의
 
 ---
 
@@ -221,9 +222,9 @@ type ProjectConfig struct {
 ```
 
 **완료 기준**:
-- [ ] `protem-gen version` 동작
-- [ ] `protem-gen create` 대화형 프롬프트 동작
-- [ ] 빈 디렉토리 생성 확인
+- [x] `protem-gen version` 동작
+- [x] `protem-gen create` 대화형 프롬프트 동작
+- [x] 빈 디렉토리 생성 확인
 
 ---
 
@@ -339,10 +340,10 @@ watch-air:
 watch-templ:
 	templ generate --watch --proxy="http://localhost:8080" --open-browser=false
 
-# Tailwind CSS 감시
+# Tailwind CSS 감시 (v4 uses @tailwindcss/cli)
 .PHONY: watch-tailwind
 watch-tailwind:
-	npx tailwindcss -i ./web/tailwind/input.css -o ./web/static/css/output.css --watch
+	npx @tailwindcss/cli -i ./web/tailwind/input.css -o ./web/static/css/output.css --watch
 
 # sqlc 코드 생성
 .PHONY: sqlc-generate
@@ -601,18 +602,18 @@ require (
 ```json
 {
   "devDependencies": {
-    "tailwindcss": "^3.4.17",
-    "@tailwindcss/forms": "^0.5.10",
-    "@tailwindcss/typography": "^0.5.16"
+    "tailwindcss": "^4.1.17",
+    "@tailwindcss/cli": "^4.1.17"
   }
 }
 ```
 
 | 패키지 | 버전 | 용도 | 비고 |
 |--------|------|------|------|
-| tailwindcss | ^3.4.17 | CSS 프레임워크 | v4는 설정 방식 대폭 변경 |
-| @tailwindcss/forms | ^0.5.10 | 폼 스타일 리셋 | |
-| @tailwindcss/typography | ^0.5.16 | 타이포그래피 | |
+| tailwindcss | ^4.1.17 | CSS 프레임워크 | v4 CSS-first 설정 방식 |
+| @tailwindcss/cli | ^4.1.17 | Tailwind CLI | 빌드 명령어용 |
+
+> **Note**: Tailwind CSS v4는 CSS-first 설정 방식을 사용합니다. `tailwind.config.js` 대신 `input.css`에서 `@import "tailwindcss"` 및 `@source` 디렉티브로 설정합니다. forms, typography 플러그인은 v4에 기본 포함됩니다.
 
 ### CDN 의존성 (생성될 프로젝트 HTML)
 
@@ -623,10 +624,11 @@ require (
 
 ### 버전 선택 근거
 
-1. **Tailwind CSS v3.4.x 선택 (v4 아님)**
+1. **Tailwind CSS v4.x 선택**
    - v4는 2025년 1월 출시, CSS-first 설정으로 대폭 변경
-   - v3.4.x는 안정적이고 문서/예제 풍부
-   - v4 마이그레이션은 향후 버전에서 지원 예정
+   - JavaScript 설정 파일 불필요, CSS 내 `@import "tailwindcss"` 사용
+   - `@source` 디렉티브로 스캔 경로 지정
+   - forms, typography 플러그인 기본 포함
 
 2. **Charmbracelet v1.x 선택 (v2 베타 아님)**
    - v2는 현재 베타 상태
@@ -678,7 +680,6 @@ require (
 5. **관측성**: OpenTelemetry, Prometheus, Grafana
 6. **컨테이너화**: Docker, Kubernetes manifests
 7. **CI/CD 템플릿**: GitHub Actions, GitLab CI
-8. **Tailwind CSS v4**: CSS-first 설정 방식 지원
 
 ---
 
@@ -686,6 +687,7 @@ require (
 
 | Version | Date | Changes | Author |
 |---------|------|---------|--------|
+| 2.1.0 | 2025-11-28 | Tailwind CSS v4 지원: CSS-first 설정 방식, @tailwindcss/cli 사용, Phase 0/1 완료 기준 마킹 | AI Assistant |
 | 2.0.0 | 2025-11-27 | **Breaking**: Gin 단일 프레임워크 지원, CLI 실행 기반 프로젝트 초기화 (ADR-004), Chi/Fiber/Echo 제거 | AI Assistant |
 | 1.2.0 | 2025-11-27 | Technical Specifications 전면 업데이트: 최신 안정화 버전 반영, 버전 선택 근거 추가 | AI Assistant |
 | 1.1.0 | 2025-11-27 | ADR-003 확장: Gin 추가 및 4개 프레임워크 상세 비교 분석 | AI Assistant |

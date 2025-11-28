@@ -151,16 +151,3 @@ func (e *Executor) AirInit(ctx context.Context) error {
 	return nil
 }
 
-// TailwindInit runs `npx tailwindcss init`
-func (e *Executor) TailwindInit(ctx context.Context) error {
-	npx := "npx"
-	if runtime.GOOS == "windows" {
-		npx = "npx.cmd"
-	}
-
-	result := e.Run(ctx, npx, "tailwindcss", "init")
-	if result.Error != nil {
-		return fmt.Errorf("tailwindcss init failed: %s", result.Stderr)
-	}
-	return nil
-}

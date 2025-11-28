@@ -71,38 +71,6 @@ func (m *Modifier) ModifyAirConfig() error {
 	return os.WriteFile(airPath, []byte(config), 0644)
 }
 
-// ModifyTailwindConfig modifies the tailwind.config.js configuration
-func (m *Modifier) ModifyTailwindConfig() error {
-	tailwindPath := filepath.Join(m.projectDir, "tailwind.config.js")
-
-	content, err := os.ReadFile(tailwindPath)
-	if err != nil {
-		return fmt.Errorf("failed to read tailwind.config.js: %w", err)
-	}
-
-	config := string(content)
-
-	// Add content paths
-	config = strings.Replace(config,
-		`content: []`,
-		`content: [
-    "./web/templates/**/*.templ",
-    "./web/templates/**/*_templ.go",
-  ]`,
-		1)
-
-	// Add plugins
-	config = strings.Replace(config,
-		`plugins: []`,
-		`plugins: [
-    require('@tailwindcss/forms'),
-    require('@tailwindcss/typography'),
-  ]`,
-		1)
-
-	return os.WriteFile(tailwindPath, []byte(config), 0644)
-}
-
 // ModifyPackageJSON modifies the package.json to add scripts
 func (m *Modifier) ModifyPackageJSON() error {
 	pkgPath := filepath.Join(m.projectDir, "package.json")
@@ -123,9 +91,9 @@ func (m *Modifier) ModifyPackageJSON() error {
 		scripts = make(map[string]interface{})
 	}
 
-	// Add CSS build scripts
-	scripts["build:css"] = "tailwindcss -i ./web/tailwind/input.css -o ./web/static/css/output.css --minify"
-	scripts["watch:css"] = "tailwindcss -i ./web/tailwind/input.css -o ./web/static/css/output.css --watch"
+	// Add CSS build scripts (Tailwind CSS v4 uses @tailwindcss/cli)
+	scripts["build:css"] = "npx @tailwindcss/cli -i ./web/tailwind/input.css -o ./web/static/css/output.css --minify"
+	scripts["watch:css"] = "npx @tailwindcss/cli -i ./web/tailwind/input.css -o ./web/static/css/output.css --watch"
 	pkg["scripts"] = scripts
 
 	// Write back with indentation
@@ -137,27 +105,3 @@ func (m *Modifier) ModifyPackageJSON() error {
 	return os.WriteFile(pkgPath, output, 0644)
 }
 
-// MoveTailwindConfig moves tailwind.config.js to web/tailwind/
-func (m *Modifier) MoveTailwindConfig() error {
-	srcPath := filepath.Join(m.projectDir, "tailwind.config.js")
-	dstPath := filepath.Join(m.projectDir, "web/tailwind/tailwind.config.js")
-
-	// Ensure destination directory exists
-	if err := os.MkdirAll(filepath.Dir(dstPath), 0755); err != nil {
-		return err
-	}
-
-	// Read source file
-	content, err := os.ReadFile(srcPath)
-	if err != nil {
-		return err
-	}
-
-	// Write to destination
-	if err := os.WriteFile(dstPath, content, 0644); err != nil {
-		return err
-	}
-
-	// Remove source file
-	return os.Remove(srcPath)
-}

@@ -2,7 +2,9 @@ package generator
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"time"
@@ -141,8 +143,8 @@ func (g *Generator) executeCLICommands(ctx context.Context) error {
 		return err
 	}
 
-	// 3. npm install tailwindcss packages
-	packages := []string{"tailwindcss", "@tailwindcss/forms", "@tailwindcss/typography"}
+	// 3. npm install tailwindcss packages (v4: tailwindcss + @tailwindcss/cli)
+	packages := []string{"tailwindcss", "@tailwindcss/cli"}
 	fmt.Printf("  npm install %s\n", packages)
 	if err := g.executor.NpmInstall(ctx, packages, true); err != nil {
 		return err
@@ -154,11 +156,7 @@ func (g *Generator) executeCLICommands(ctx context.Context) error {
 		return err
 	}
 
-	// 5. tailwindcss init
-	fmt.Println("  npx tailwindcss init")
-	if err := g.executor.TailwindInit(ctx); err != nil {
-		return err
-	}
+	// Note: Tailwind CSS v4 uses CSS-first configuration, no init command needed
 
 	return nil
 }
@@ -169,13 +167,7 @@ func (g *Generator) modifyCLIGeneratedFiles() error {
 		fmt.Printf("  Warning: could not modify .air.toml: %v\n", err)
 	}
 
-	// Modify and move tailwind.config.js
-	if err := g.modifier.ModifyTailwindConfig(); err != nil {
-		fmt.Printf("  Warning: could not modify tailwind.config.js: %v\n", err)
-	}
-	if err := g.modifier.MoveTailwindConfig(); err != nil {
-		fmt.Printf("  Warning: could not move tailwind.config.js: %v\n", err)
-	}
+	// Note: Tailwind CSS v4 uses CSS-first configuration, no tailwind.config.js needed
 
 	// Modify package.json
 	if err := g.modifier.ModifyPackageJSON(); err != nil {
@@ -251,7 +243,7 @@ func (g *Generator) generateFrameworkFiles() error {
 	for _, f := range files {
 		if err := g.generateFile(f.template, f.output); err != nil {
 			// Skip if template doesn't exist (graceful fallback)
-			if os.IsNotExist(err) {
+			if errors.Is(err, fs.ErrNotExist) {
 				continue
 			}
 			return err
@@ -279,7 +271,7 @@ func (g *Generator) generateDatabaseFiles() error {
 
 	for _, f := range files {
 		if err := g.generateFile(f.template, f.output); err != nil {
-			if os.IsNotExist(err) {
+			if errors.Is(err, fs.ErrNotExist) {
 				continue
 			}
 			return err
@@ -303,7 +295,7 @@ func (g *Generator) generateFrontendFiles() error {
 
 	for _, f := range files {
 		if err := g.generateFile(f.template, f.output); err != nil {
-			if os.IsNotExist(err) {
+			if errors.Is(err, fs.ErrNotExist) {
 				continue
 			}
 			return err

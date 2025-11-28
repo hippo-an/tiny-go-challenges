@@ -1,6 +1,8 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* Scan templ files for Tailwind classes */
+@source "../templates/**/*.templ";
+@source "../templates/**/*_templ.go";
 
 /* Custom styles */
 @layer components {
