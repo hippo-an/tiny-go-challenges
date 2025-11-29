@@ -200,6 +200,11 @@ func (g *Generator) generateTemplateFiles() error {
 		return err
 	}
 
+	// Generate architecture files (Clean Architecture)
+	if err := g.generateArchitectureFiles(); err != nil {
+		return err
+	}
+
 	// Generate database-specific files
 	if err := g.generateDatabaseFiles(); err != nil {
 		return err
@@ -243,6 +248,29 @@ func (g *Generator) generateFrameworkFiles() error {
 	for _, f := range files {
 		if err := g.generateFile(f.template, f.output); err != nil {
 			// Skip if template doesn't exist (graceful fallback)
+			if errors.Is(err, fs.ErrNotExist) {
+				continue
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (g *Generator) generateArchitectureFiles() error {
+	files := []struct {
+		template string
+		output   string
+	}{
+		{"architecture/domain/user.go.tmpl", "internal/domain/user.go"},
+		{"architecture/application/user_service.go.tmpl", "internal/application/user_service.go"},
+		{"architecture/infrastructure/user_repository.go.tmpl", "internal/infrastructure/user_repository.go"},
+		{"architecture/interfaces/user_handler.go.tmpl", "internal/interfaces/user_handler.go"},
+	}
+
+	for _, f := range files {
+		if err := g.generateFile(f.template, f.output); err != nil {
 			if errors.Is(err, fs.ErrNotExist) {
 				continue
 			}
@@ -314,9 +342,7 @@ func (g *Generator) installGoDependencies(ctx context.Context) error {
 	// Add database driver
 	switch g.config.Database {
 	case config.DatabasePostgres:
-		packages = append(packages, "github.com/jackc/pgx/v5")
-	case config.DatabaseMySQL:
-		packages = append(packages, "github.com/go-sql-driver/mysql")
+		packages = append(packages, "github.com/jackc/pgx/v5/pgxpool")
 	case config.DatabaseSQLite:
 		packages = append(packages, "modernc.org/sqlite")
 	}

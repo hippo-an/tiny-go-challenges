@@ -29,7 +29,7 @@ var createCmd = &cobra.Command{
 
 This command will guide you through setting up:
   - Project name and Go module path
-  - Database (PostgreSQL, MySQL, SQLite, or none)
+  - Database (PostgreSQL, SQLite, or none)
   - Optional features (gRPC, Auth boilerplate, AI integration)
 
 The generated project uses Gin as the HTTP framework.
@@ -43,7 +43,7 @@ Example:
 func init() {
 	createCmd.Flags().StringVarP(&flagName, "name", "n", "", "Project name")
 	createCmd.Flags().StringVarP(&flagModule, "module", "m", "", "Go module path (e.g., github.com/user/project)")
-	createCmd.Flags().StringVarP(&flagDatabase, "database", "d", "postgres", "Database: postgres, mysql, sqlite, none")
+	createCmd.Flags().StringVarP(&flagDatabase, "database", "d", "postgres", "Database: postgres, sqlite, none")
 	createCmd.Flags().BoolVar(&flagGRPC, "grpc", false, "Include gRPC support")
 	createCmd.Flags().BoolVar(&flagAuth, "auth", false, "Include authentication boilerplate")
 	createCmd.Flags().BoolVar(&flagAI, "ai", false, "Include AI integration boilerplate")

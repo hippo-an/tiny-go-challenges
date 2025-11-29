@@ -1,8 +1,8 @@
 # protem-gen: Product Requirements Document
 
-> **Version**: 2.1.0
-> **Status**: Implemented - Phase 1 Complete
-> **Last Updated**: 2025-11-28
+> **Version**: 2.2.0
+> **Status**: Implemented - Phase 2 In Progress
+> **Last Updated**: 2025-11-29
 
 ---
 
@@ -48,7 +48,7 @@
 | FR-010 | Project Name | string | 필수 입력 | P0 |
 | FR-011 | Module Path | string | github.com/user/name | P0 |
 | FR-012 | HTTP Framework | gin (고정) | gin | P0 |
-| FR-013 | Database | postgres, mysql, sqlite, none | postgres | P0 |
+| FR-013 | Database | postgres, sqlite, none | postgres | P0 |
 | FR-014 | Include gRPC | boolean | false | P1 |
 | FR-015 | Include Auth | boolean | false | P2 |
 | FR-016 | Include AI Ready | boolean | false | P2 |
@@ -237,7 +237,7 @@ make dev      # 핫 리로드 개발 서버 시작
 | CSS | Tailwind CSS | v4.x |
 | Interactivity | htmx | v2.0.x |
 | Client State | Alpine.js | v3.x |
-| Database | PostgreSQL/MySQL/SQLite | - |
+| Database | PostgreSQL/SQLite | - |
 | SQL Codegen | sqlc | v1.30.x |
 | Hot Reload | air | latest |
 

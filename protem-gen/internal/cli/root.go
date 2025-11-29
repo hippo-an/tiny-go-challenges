@@ -12,7 +12,7 @@ with hot-reloading development environment and modern architecture patterns.
 
 It scaffolds new projects with:
   - Gin HTTP framework
-  - Database integration (PostgreSQL, MySQL, SQLite) with sqlc
+  - Database integration (PostgreSQL, SQLite) with sqlc
   - Frontend stack (Tailwind CSS, Alpine.js, htmx, templ)
   - Hot-reloading development environment (air, templ watch, tailwind watch)
   - Clean Architecture project structure`,

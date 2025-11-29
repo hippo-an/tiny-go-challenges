@@ -68,7 +68,6 @@ func (e *Engine) Render(templatePath string, cfg *config.ProjectConfig) (string,
 func databaseImport(database config.Database) string {
 	imports := map[config.Database]string{
 		config.DatabasePostgres: "github.com/jackc/pgx/v5",
-		config.DatabaseMySQL:    "github.com/go-sql-driver/mysql",
 		config.DatabaseSQLite:   "modernc.org/sqlite",
 	}
 	return imports[database]

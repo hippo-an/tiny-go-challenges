@@ -1,0 +1,155 @@
+package infrastructure
+
+import (
+{{if eq .Database "none"}}
+	"sync"
+	"time"
+
+	"{{.ModulePath}}/internal/domain"
+{{else}}
+	"{{.ModulePath}}/internal/domain"
+	"{{.ModulePath}}/internal/infrastructure/database"
+{{end}}
+)
+
+{{if eq .Database "none"}}
+// InMemoryUserRepository is an in-memory implementation of UserRepository
+// Use this for development/testing when no database is configured
+type InMemoryUserRepository struct {
+	mu     sync.RWMutex
+	users  map[int64]*domain.User
+	nextID int64
+}
+
+// NewUserRepository creates a new in-memory user repository
+func NewUserRepository() *InMemoryUserRepository {
+	return &InMemoryUserRepository{
+		users:  make(map[int64]*domain.User),
+		nextID: 1,
+	}
+}
+
+func (r *InMemoryUserRepository) Create(user *domain.User) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	user.ID = r.nextID
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
+	r.users[user.ID] = user
+	r.nextID++
+	return nil
+}
+
+func (r *InMemoryUserRepository) GetByID(id int64) (*domain.User, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	user, ok := r.users[id]
+	if !ok {
+		return nil, domain.ErrUserNotFound
+	}
+	return user, nil
+}
+
+func (r *InMemoryUserRepository) GetByEmail(email string) (*domain.User, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	for _, user := range r.users {
+		if user.Email == email {
+			return user, nil
+		}
+	}
+	return nil, domain.ErrUserNotFound
+}
+
+func (r *InMemoryUserRepository) Update(user *domain.User) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if _, ok := r.users[user.ID]; !ok {
+		return domain.ErrUserNotFound
+	}
+	user.UpdatedAt = time.Now()
+	r.users[user.ID] = user
+	return nil
+}
+
+func (r *InMemoryUserRepository) Delete(id int64) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if _, ok := r.users[id]; !ok {
+		return domain.ErrUserNotFound
+	}
+	delete(r.users, id)
+	return nil
+}
+
+func (r *InMemoryUserRepository) List(limit, offset int) ([]*domain.User, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	users := make([]*domain.User, 0, len(r.users))
+	for _, user := range r.users {
+		users = append(users, user)
+	}
+
+	// Apply pagination
+	start := offset
+	if start > len(users) {
+		return []*domain.User{}, nil
+	}
+	end := start + limit
+	if end > len(users) {
+		end = len(users)
+	}
+	return users[start:end], nil
+}
+{{else}}
+// UserRepository implements domain.UserRepository using sqlc-generated code
+type UserRepository struct {
+	db *database.DB
+}
+
+// NewUserRepository creates a new user repository
+func NewUserRepository(db *database.DB) *UserRepository {
+	return &UserRepository{db: db}
+}
+
+func (r *UserRepository) Create(user *domain.User) error {
+	// TODO: Implement with sqlc queries after running `make sqlc-generate`
+	// Example:
+	// result, err := r.db.queries.CreateUser(ctx, sqlc.CreateUserParams{
+	//     Email: user.Email,
+	//     Name:  user.Name,
+	// })
+	return nil
+}
+
+func (r *UserRepository) GetByID(id int64) (*domain.User, error) {
+	// TODO: Implement with sqlc queries
+	return nil, domain.ErrUserNotFound
+}
+
+func (r *UserRepository) GetByEmail(email string) (*domain.User, error) {
+	// TODO: Implement with sqlc queries
+	return nil, domain.ErrUserNotFound
+}
+
+func (r *UserRepository) Update(user *domain.User) error {
+	// TODO: Implement with sqlc queries
+	return nil
+}
+
+func (r *UserRepository) Delete(id int64) error {
+	// TODO: Implement with sqlc queries
+	return nil
+}
+
+func (r *UserRepository) List(limit, offset int) ([]*domain.User, error) {
+	// TODO: Implement with sqlc queries
+	return nil, nil
+}
+{{end}}

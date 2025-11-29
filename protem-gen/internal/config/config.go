@@ -5,7 +5,6 @@ type Database string
 
 const (
 	DatabasePostgres Database = "postgres"
-	DatabaseMySQL    Database = "mysql"
 	DatabaseSQLite   Database = "sqlite"
 	DatabaseNone     Database = "none"
 )
@@ -57,7 +56,6 @@ func (c *ProjectConfig) Validate() error {
 func DatabaseOptions() []Database {
 	return []Database{
 		DatabasePostgres,
-		DatabaseMySQL,
 		DatabaseSQLite,
 		DatabaseNone,
 	}

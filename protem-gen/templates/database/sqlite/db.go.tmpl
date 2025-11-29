@@ -1,0 +1,65 @@
+package database
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+	"os"
+	"path/filepath"
+
+	_ "modernc.org/sqlite"
+)
+
+// DB holds the database connection
+type DB struct {
+	Conn *sql.DB
+}
+
+// New creates a new database connection
+func New(ctx context.Context) (*DB, error) {
+	dbPath := os.Getenv("DATABASE_PATH")
+	if dbPath == "" {
+		// Default database path for local development
+		dbPath = "./data/{{.Name}}.db"
+	}
+
+	// Ensure directory exists
+	if err := os.MkdirAll(filepath.Dir(dbPath), 0755); err != nil {
+		return nil, fmt.Errorf("failed to create database directory: %w", err)
+	}
+
+	dsn := fmt.Sprintf("%s?_journal_mode=WAL&_busy_timeout=5000", dbPath)
+
+	db, err := sql.Open("sqlite", dsn)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open database: %w", err)
+	}
+
+	// SQLite specific settings
+	db.SetMaxOpenConns(1) // SQLite only supports one writer at a time
+
+	// Verify connection
+	if err := db.PingContext(ctx); err != nil {
+		return nil, fmt.Errorf("failed to ping database: %w", err)
+	}
+
+	// Enable foreign keys
+	if _, err := db.ExecContext(ctx, "PRAGMA foreign_keys = ON"); err != nil {
+		return nil, fmt.Errorf("failed to enable foreign keys: %w", err)
+	}
+
+	return &DB{Conn: db}, nil
+}
+
+// Close closes the database connection
+func (db *DB) Close() error {
+	if db.Conn != nil {
+		return db.Conn.Close()
+	}
+	return nil
+}
+
+// Health checks if the database connection is healthy
+func (db *DB) Health(ctx context.Context) error {
+	return db.Conn.PingContext(ctx)
+}

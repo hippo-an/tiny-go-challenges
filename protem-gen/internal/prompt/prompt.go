@@ -292,7 +292,6 @@ func (m Model) viewDatabaseStep() string {
 		desc string
 	}{
 		{"postgres", "PostgreSQL with pgx driver"},
-		{"mysql", "MySQL with go-sql-driver"},
 		{"sqlite", "SQLite (file-based, no server)"},
 		{"none", "No database integration"},
 	}

@@ -39,7 +39,7 @@ protem-gen create
 # 대화형 프롬프트
 > Project name: my-app
 > Include gRPC? [y/N]: y
-> Database type: [postgres/mysql/sqlite]: postgres
+> Database type: [postgres/sqlite]: postgres
 
 # 결과: ./my-app/ 에 완전한 프로젝트 생성
 ```
@@ -213,7 +213,7 @@ protem-gen/
 type ProjectConfig struct {
     Name        string   // 프로젝트 이름
     ModulePath  string   // Go 모듈 경로
-    Database    string   // postgres, mysql, sqlite, none
+    Database    string   // postgres, sqlite, none
     IncludeGRPC bool     // gRPC 포함 여부
     IncludeAuth bool     // 인증 보일러플레이트
     IncludeAI   bool     // AI 통합 준비 코드
@@ -261,10 +261,14 @@ templates/
 ├── database/
 │   ├── postgres/
 │   │   ├── sqlc.yaml.tmpl
+│   │   ├── db.go.tmpl
 │   │   ├── schema.sql.tmpl
-│   │   └── queries/
-│   ├── mysql/
+│   │   └── queries.sql.tmpl
 │   └── sqlite/
+│       ├── sqlc.yaml.tmpl
+│       ├── db.go.tmpl
+│       ├── schema.sql.tmpl
+│       └── queries.sql.tmpl
 ├── frontend/
 │   ├── tailwind.config.js.tmpl
 │   ├── package.json.tmpl
@@ -389,7 +393,7 @@ test:
 # sqlc.yaml 템플릿
 version: "2"
 sql:
-  - engine: "postgresql"  # 또는 mysql, sqlite
+  - engine: "postgresql"  # 또는 sqlite
     queries: "sqlc/queries/"
     schema: "migrations/"
     gen:
@@ -575,7 +579,6 @@ require (
 
     // 데이터베이스 (선택)
     github.com/jackc/pgx/v5 v5.7.5            // PostgreSQL
-    // github.com/go-sql-driver/mysql v1.8.1  // MySQL (옵션)
     // modernc.org/sqlite v1.34.5             // SQLite (옵션)
 )
 
@@ -687,6 +690,7 @@ require (
 
 | Version | Date | Changes | Author |
 |---------|------|---------|--------|
+| 2.2.0 | 2025-11-29 | Phase 2 완료: 아키텍처/DB 템플릿 추가, MySQL 제거 (PostgreSQL/SQLite만 지원) | AI Assistant |
 | 2.1.0 | 2025-11-28 | Tailwind CSS v4 지원: CSS-first 설정 방식, @tailwindcss/cli 사용, Phase 0/1 완료 기준 마킹 | AI Assistant |
 | 2.0.0 | 2025-11-27 | **Breaking**: Gin 단일 프레임워크 지원, CLI 실행 기반 프로젝트 초기화 (ADR-004), Chi/Fiber/Echo 제거 | AI Assistant |
 | 1.2.0 | 2025-11-27 | Technical Specifications 전면 업데이트: 최신 안정화 버전 반영, 버전 선택 근거 추가 | AI Assistant |
