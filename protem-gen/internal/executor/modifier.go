@@ -53,20 +53,12 @@ func (m *Modifier) ModifyAirConfig() error {
 			1)
 	}
 
-	// Add pre_cmd for templ generate
-	if !strings.Contains(config, "templ generate") {
-		// Find [build] section and add pre_cmd after cmd line
-		lines := strings.Split(config, "\n")
-		var newLines []string
-		for i, line := range lines {
-			newLines = append(newLines, line)
-			if strings.HasPrefix(strings.TrimSpace(line), "cmd = ") && i > 0 {
-				// Add pre_cmd after cmd
-				newLines = append(newLines, `  pre_cmd = ["templ generate"]`)
-			}
-		}
-		config = strings.Join(newLines, "\n")
-	}
+	// Replace empty pre_cmd with templ generate command
+	// air init generates pre_cmd = [], we need to replace it
+	config = strings.Replace(config,
+		`pre_cmd = []`,
+		`pre_cmd = ["templ generate"]`,
+		1)
 
 	return os.WriteFile(airPath, []byte(config), 0644)
 }
