@@ -81,7 +81,13 @@ func (g *Generator) Generate() error {
 		return fmt.Errorf("failed to generate template files: %w", err)
 	}
 
-	// Step 7: Install Go dependencies and tidy
+	// Step 7: Generate templ files (required before go mod tidy)
+	fmt.Println("Generating templ files...")
+	if err := g.generateTemplFiles(ctx); err != nil {
+		return fmt.Errorf("failed to generate templ files: %w", err)
+	}
+
+	// Step 8: Install Go dependencies and tidy
 	fmt.Println("Installing dependencies...")
 	if err := g.installGoDependencies(ctx); err != nil {
 		return fmt.Errorf("failed to install Go dependencies: %w", err)
@@ -330,6 +336,15 @@ func (g *Generator) generateFrontendFiles() error {
 		}
 	}
 
+	return nil
+}
+
+func (g *Generator) generateTemplFiles(ctx context.Context) error {
+	fmt.Println("  templ generate")
+	result := g.executor.Run(ctx, "templ", "generate")
+	if result.Error != nil {
+		return fmt.Errorf("templ generate failed: %s", result.Stderr)
+	}
 	return nil
 }
 
