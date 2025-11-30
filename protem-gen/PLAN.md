@@ -2,9 +2,9 @@
 
 ## Implementation Plan
 
-> **Document Version**: 2.4.0
+> **Document Version**: 2.5.0
 > **Last Updated**: 2025-12-01
-> **Status**: Implemented - Phase 3 Complete
+> **Status**: Implemented - Phase 5 Complete
 
 ---
 
@@ -417,9 +417,9 @@ sql:
 | 4.2.5 | 리포지토리 패턴 구현 | 4.2.3 | `repository.go.tmpl` |
 
 **완료 기준**:
-- [ ] `make sqlc-generate` 동작
-- [ ] 생성된 코드 컴파일 성공
-- [ ] 예제 CRUD 작업 동작
+- [x] `make sqlc-generate` 동작
+- [x] 생성된 코드 컴파일 성공
+- [x] 예제 CRUD 작업 동작 (Querier 인터페이스: Create, Get, List, Update, Delete, Count)
 
 ---
 
@@ -461,10 +461,10 @@ web/
 | 5.2.5 | 핸들러와 템플릿 연결 | 5.2.1-4 | 라우트 설정 |
 
 **완료 기준**:
-- [ ] templ 파일 렌더링 성공
-- [ ] htmx 부분 업데이트 동작
-- [ ] Alpine.js 상호작용 동작
-- [ ] Tailwind 스타일 적용
+- [x] templ 파일 렌더링 성공
+- [x] htmx 부분 업데이트 동작 (`/api/ping` 엔드포인트 연동)
+- [x] Alpine.js 상호작용 동작 (`x-data`, `@click` 카운터 예제)
+- [x] Tailwind 스타일 적용 (v4 CSS-first, 458줄 output.css 생성)
 
 ---
 
@@ -690,6 +690,7 @@ require (
 
 | Version | Date | Changes | Author |
 |---------|------|---------|--------|
+| 2.5.0 | 2025-12-01 | Phase 4/5 완료: Database Integration (sqlc CRUD) 및 Frontend Integration (templ, htmx, Alpine.js, Tailwind) 검증 완료 | AI Assistant |
 | 2.4.0 | 2025-12-01 | Phase 3 완료: Hot Reload Pipeline 검증 완료, .air.toml pre_cmd 버그 수정 | AI Assistant |
 | 2.3.0 | 2025-11-30 | Phase 2 완료 검증: templ generate 자동화 추가, 모든 DB 옵션 빌드 테스트 통과 | AI Assistant |
 | 2.2.0 | 2025-11-29 | Phase 2 완료: 아키텍처/DB 템플릿 추가, MySQL 제거 (PostgreSQL/SQLite만 지원) | AI Assistant |
