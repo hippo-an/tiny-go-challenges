@@ -148,10 +148,12 @@
 
 ## 6. User Workflow
 
-### 6.1 설치
+### 6.1 설치 (Build from Source)
 
 ```bash
-go install github.com/hippo-an/tiny-go-challenges/protem-gen@latest
+git clone https://github.com/hippo-an/tiny-go-challenges.git
+cd tiny-go-challenges/protem-gen
+make install
 ```
 
 ### 6.2 프로젝트 생성
@@ -315,8 +317,10 @@ make dev      # 핫 리로드 개발 서버 시작
 ## Appendix A: Command Reference
 
 ```bash
-# 설치
-go install github.com/hippo-an/tiny-go-challenges/protem-gen@latest
+# 설치 (Build from Source)
+git clone https://github.com/hippo-an/tiny-go-challenges.git
+cd tiny-go-challenges/protem-gen
+make install
 
 # 버전 확인
 protem-gen version

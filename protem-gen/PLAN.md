@@ -30,8 +30,10 @@
 ### Target Usage
 
 ```bash
-# 설치
-go install github.com/hippo-an/tiny-go-challenges/protem-gen@latest
+# 설치 (Build from Source)
+git clone https://github.com/hippo-an/tiny-go-challenges.git
+cd tiny-go-challenges/protem-gen
+make install
 
 # 실행
 protem-gen create
@@ -654,11 +656,7 @@ require (
    - v1은 프로덕션 검증된 안정 버전
    - v2 정식 출시 후 업그레이드 검토
 
-3. **Fiber v2 선택 (v3 베타 아님)**
-   - v3는 현재 beta.4 상태
-   - v2.52.6은 안정적인 최신 버전
-
-4. **air 저장소 변경**
+3. **air 저장소 변경**
    - `cosmtrek/air` → `air-verse/air`로 이전됨
    - 새 저장소에서 유지보수 진행 중
 
