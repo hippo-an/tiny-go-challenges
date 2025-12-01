@@ -1,0 +1,158 @@
+package prompt
+
+import (
+	"bytes"
+	"fmt"
+	"sync"
+	"text/template"
+)
+
+// Template represents a prompt template
+type Template struct {
+	Name        string            `json:"name"`
+	Description string            `json:"description,omitempty"`
+	System      string            `json:"system,omitempty"`
+	User        string            `json:"user"`
+	Variables   map[string]string `json:"variables,omitempty"`
+}
+
+// Manager manages prompt templates
+type Manager struct {
+	templates map[string]*Template
+	mu        sync.RWMutex
+}
+
+// NewManager creates a new prompt manager
+func NewManager() *Manager {
+	return &Manager{
+		templates: make(map[string]*Template),
+	}
+}
+
+// Register adds a new template to the manager
+func (m *Manager) Register(tmpl *Template) error {
+	if tmpl.Name == "" {
+		return fmt.Errorf("template name is required")
+	}
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.templates[tmpl.Name] = tmpl
+	return nil
+}
+
+// Get retrieves a template by name
+func (m *Manager) Get(name string) (*Template, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	tmpl, ok := m.templates[name]
+	if !ok {
+		return nil, fmt.Errorf("template not found: %s", name)
+	}
+	return tmpl, nil
+}
+
+// Render renders a template with the given variables
+func (m *Manager) Render(name string, vars map[string]interface{}) (system, user string, err error) {
+	tmpl, err := m.Get(name)
+	if err != nil {
+		return "", "", err
+	}
+
+	// Merge default variables with provided variables
+	mergedVars := make(map[string]interface{})
+	for k, v := range tmpl.Variables {
+		mergedVars[k] = v
+	}
+	for k, v := range vars {
+		mergedVars[k] = v
+	}
+
+	// Render system prompt
+	if tmpl.System != "" {
+		system, err = renderTemplate(tmpl.System, mergedVars)
+		if err != nil {
+			return "", "", fmt.Errorf("failed to render system prompt: %w", err)
+		}
+	}
+
+	// Render user prompt
+	user, err = renderTemplate(tmpl.User, mergedVars)
+	if err != nil {
+		return "", "", fmt.Errorf("failed to render user prompt: %w", err)
+	}
+
+	return system, user, nil
+}
+
+// List returns all registered template names
+func (m *Manager) List() []string {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	names := make([]string, 0, len(m.templates))
+	for name := range m.templates {
+		names = append(names, name)
+	}
+	return names
+}
+
+// renderTemplate renders a Go text template
+func renderTemplate(text string, vars map[string]interface{}) (string, error) {
+	tmpl, err := template.New("prompt").Parse(text)
+	if err != nil {
+		return "", err
+	}
+
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, vars); err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
+}
+
+// DefaultTemplates returns a set of commonly used prompt templates
+func DefaultTemplates() []*Template {
+	return []*Template{
+		{
+			Name:        "summarize",
+			Description: "Summarize the given text",
+			System:      "You are a helpful assistant that summarizes text concisely.",
+			User:        "Please summarize the following text:\n\n{{"{{"}}.text{{"}}"}}",
+		},
+		{
+			Name:        "translate",
+			Description: "Translate text to another language",
+			System:      "You are a professional translator.",
+			User:        "Translate the following text to {{"{{"}}.target_language{{"}}"}}:\n\n{{"{{"}}.text{{"}}"}}",
+			Variables: map[string]string{
+				"target_language": "English",
+			},
+		},
+		{
+			Name:        "code_review",
+			Description: "Review code for issues and improvements",
+			System:      "You are an experienced software engineer conducting a code review.",
+			User:        "Please review the following {{"{{"}}.language{{"}}"}} code and provide feedback:\n\n{{"{{"}}.code{{"}}"}}",
+			Variables: map[string]string{
+				"language": "go",
+			},
+		},
+		{
+			Name:        "explain",
+			Description: "Explain a concept or code",
+			System:      "You are a patient teacher who explains complex topics simply.",
+			User:        "Please explain the following:\n\n{{"{{"}}.topic{{"}}"}}",
+		},
+	}
+}
+
+// LoadDefaults loads the default templates into the manager
+func (m *Manager) LoadDefaults() {
+	for _, tmpl := range DefaultTemplates() {
+		_ = m.Register(tmpl)
+	}
+}

@@ -1,4 +1,4 @@
-.PHONY: help dev build test clean setup watch-air watch-templ watch-tailwind sqlc-generate templ-generate
+.PHONY: help dev build test clean setup watch-air watch-templ watch-tailwind sqlc-generate templ-generate{{if .IncludeGRPC}} proto-generate{{end}}
 
 # Default target
 help:
@@ -19,6 +19,9 @@ help:
 	@echo "Code generation:"
 	@echo "  make sqlc-generate    Generate sqlc code"
 	@echo "  make templ-generate   Generate templ code"
+{{- if .IncludeGRPC}}
+	@echo "  make proto-generate   Generate protobuf code (buf)"
+{{- end}}
 
 # Development - run all watchers in parallel
 dev:
@@ -49,6 +52,9 @@ setup:
 	go install github.com/a-h/templ/cmd/templ@latest
 {{- if ne .Database "none"}}
 	go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+{{- end}}
+{{- if .IncludeGRPC}}
+	go install github.com/bufbuild/buf/cmd/buf@latest
 {{- end}}
 	@echo "Setup complete!"
 
@@ -81,3 +87,12 @@ clean:
 	rm -rf tmp/
 	rm -f web/static/css/output.css
 	find . -name "*_templ.go" -delete
+{{- if .IncludeGRPC}}
+	rm -rf internal/interfaces/grpc/pb/*.go
+{{- end}}
+
+{{- if .IncludeGRPC}}
+# Generate protobuf code using buf
+proto-generate:
+	buf generate
+{{- end}}

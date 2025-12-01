@@ -19,11 +19,13 @@ type Engine struct {
 func NewEngine() *Engine {
 	return &Engine{
 		funcMap: template.FuncMap{
-			"title":    strings.Title,
-			"lower":    strings.ToLower,
-			"upper":    strings.ToUpper,
-			"replace":  strings.ReplaceAll,
-			"contains": strings.Contains,
+			"title":       strings.Title,
+			"lower":       strings.ToLower,
+			"upper":       strings.ToUpper,
+			"replace":     strings.ReplaceAll,
+			"contains":    strings.Contains,
+			"ToSnakeCase": toSnakeCase,
+			"ToCamelCase": toCamelCase,
 			"hasGRPC": func(cfg *config.ProjectConfig) bool {
 				return cfg.IncludeGRPC
 			},
@@ -71,4 +73,34 @@ func databaseImport(database config.Database) string {
 		config.DatabaseSQLite:   "modernc.org/sqlite",
 	}
 	return imports[database]
+}
+
+// toSnakeCase converts a string to snake_case
+func toSnakeCase(s string) string {
+	// Replace hyphens with underscores
+	s = strings.ReplaceAll(s, "-", "_")
+
+	var result strings.Builder
+	for i, r := range s {
+		if i > 0 && r >= 'A' && r <= 'Z' {
+			result.WriteRune('_')
+		}
+		result.WriteRune(r)
+	}
+	return strings.ToLower(result.String())
+}
+
+// toCamelCase converts a string to CamelCase
+func toCamelCase(s string) string {
+	// Replace hyphens and underscores with spaces for splitting
+	s = strings.ReplaceAll(s, "-", " ")
+	s = strings.ReplaceAll(s, "_", " ")
+
+	words := strings.Fields(s)
+	for i, word := range words {
+		if len(word) > 0 {
+			words[i] = strings.ToUpper(string(word[0])) + strings.ToLower(word[1:])
+		}
+	}
+	return strings.Join(words, "")
 }

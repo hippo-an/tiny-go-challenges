@@ -123,7 +123,12 @@ func (g *Generator) createDirectories() error {
 
 	// Add AI directories if enabled
 	if g.config.IncludeAI {
-		dirs = append(dirs, "internal/infrastructure/llm", "internal/infrastructure/prompt")
+		dirs = append(dirs, "internal/infrastructure/llm", "internal/infrastructure/prompt", "internal/infrastructure/stream")
+	}
+
+	// Add Auth directories if enabled
+	if g.config.IncludeAuth {
+		dirs = append(dirs, "internal/infrastructure/auth")
 	}
 
 	for _, dir := range dirs {
@@ -218,6 +223,11 @@ func (g *Generator) generateTemplateFiles() error {
 
 	// Generate frontend template files
 	if err := g.generateFrontendFiles(); err != nil {
+		return err
+	}
+
+	// Generate optional feature files
+	if err := g.generateOptionalFeatureFiles(); err != nil {
 		return err
 	}
 
@@ -362,6 +372,19 @@ func (g *Generator) installGoDependencies(ctx context.Context) error {
 		packages = append(packages, "modernc.org/sqlite")
 	}
 
+	// Add gRPC packages
+	if g.config.IncludeGRPC {
+		packages = append(packages,
+			"google.golang.org/grpc",
+			"google.golang.org/protobuf",
+		)
+	}
+
+	// Add Auth packages
+	if g.config.IncludeAuth {
+		packages = append(packages, "github.com/golang-jwt/jwt/v5")
+	}
+
 	fmt.Printf("  go get %v\n", packages)
 	if err := g.executor.GoGet(ctx, packages); err != nil {
 		return err
@@ -369,6 +392,98 @@ func (g *Generator) installGoDependencies(ctx context.Context) error {
 
 	fmt.Println("  go mod tidy")
 	return g.executor.GoModTidy(ctx)
+}
+
+func (g *Generator) generateOptionalFeatureFiles() error {
+	// Generate gRPC files if enabled
+	if g.config.IncludeGRPC {
+		if err := g.generateGRPCFiles(); err != nil {
+			return err
+		}
+	}
+
+	// Generate AI files if enabled
+	if g.config.IncludeAI {
+		if err := g.generateAIFiles(); err != nil {
+			return err
+		}
+	}
+
+	// Generate Auth files if enabled
+	if g.config.IncludeAuth {
+		if err := g.generateAuthFiles(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (g *Generator) generateGRPCFiles() error {
+	files := []struct {
+		template string
+		output   string
+	}{
+		{"grpc/proto/service.proto.tmpl", "proto/service.proto"},
+		{"grpc/buf.yaml.tmpl", "buf.yaml"},
+		{"grpc/buf.gen.yaml.tmpl", "buf.gen.yaml"},
+		{"grpc/server.go.tmpl", "internal/interfaces/grpc/server.go"},
+	}
+
+	for _, f := range files {
+		if err := g.generateFile(f.template, f.output); err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				continue
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (g *Generator) generateAIFiles() error {
+	files := []struct {
+		template string
+		output   string
+	}{
+		{"ai/llm/client.go.tmpl", "internal/infrastructure/llm/client.go"},
+		{"ai/prompt/manager.go.tmpl", "internal/infrastructure/prompt/manager.go"},
+		{"ai/stream/handler.go.tmpl", "internal/infrastructure/stream/handler.go"},
+	}
+
+	for _, f := range files {
+		if err := g.generateFile(f.template, f.output); err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				continue
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (g *Generator) generateAuthFiles() error {
+	files := []struct {
+		template string
+		output   string
+	}{
+		{"auth/jwt.go.tmpl", "internal/infrastructure/auth/jwt.go"},
+		{"auth/session.go.tmpl", "internal/infrastructure/auth/session.go"},
+		{"auth/middleware.go.tmpl", "internal/infrastructure/auth/middleware.go"},
+	}
+
+	for _, f := range files {
+		if err := g.generateFile(f.template, f.output); err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				continue
+			}
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (g *Generator) cleanup() {

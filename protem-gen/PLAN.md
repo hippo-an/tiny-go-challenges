@@ -2,9 +2,9 @@
 
 ## Implementation Plan
 
-> **Document Version**: 2.5.0
+> **Document Version**: 2.6.0
 > **Last Updated**: 2025-12-01
-> **Status**: Implemented - Phase 5 Complete
+> **Status**: Implemented - Phase 6 Complete
 
 ---
 
@@ -473,29 +473,36 @@ web/
 
 #### 6.1 gRPC 지원
 
-| Step | Task | 산출물 |
-|------|------|--------|
-| 6.1.1 | Proto 파일 템플릿 | `proto/*.proto.tmpl` |
-| 6.1.2 | gRPC 서버 설정 | `grpc/server.go.tmpl` |
-| 6.1.3 | buf 설정 | `buf.yaml.tmpl` |
-| 6.1.4 | Makefile 명령어 추가 | `make proto-generate` |
+| Step | Task | 산출물 | 상태 |
+|------|------|--------|------|
+| 6.1.1 | Proto 파일 템플릿 | `grpc/proto/service.proto.tmpl` | ✅ |
+| 6.1.2 | gRPC 서버 설정 | `grpc/server.go.tmpl` | ✅ |
+| 6.1.3 | buf 설정 | `grpc/buf.yaml.tmpl`, `grpc/buf.gen.yaml.tmpl` | ✅ |
+| 6.1.4 | Makefile 명령어 추가 | `make proto-generate` | ✅ |
 
 #### 6.2 AI 통합 준비
 
-| Step | Task | 산출물 |
-|------|------|--------|
-| 6.2.1 | LLM 클라이언트 인터페이스 | `llm/client.go.tmpl` |
-| 6.2.2 | 프롬프트 매니저 | `prompt/manager.go.tmpl` |
-| 6.2.3 | 스트리밍 응답 핸들러 | `stream/handler.go.tmpl` |
-| 6.2.4 | API 키 관리 패턴 | `config/secrets.go.tmpl` |
+| Step | Task | 산출물 | 상태 |
+|------|------|--------|------|
+| 6.2.1 | LLM 클라이언트 인터페이스 | `ai/llm/client.go.tmpl` | ✅ |
+| 6.2.2 | 프롬프트 매니저 | `ai/prompt/manager.go.tmpl` | ✅ |
+| 6.2.3 | 스트리밍 응답 핸들러 | `ai/stream/handler.go.tmpl` | ✅ |
 
 #### 6.3 인증 보일러플레이트
 
-| Step | Task | 산출물 |
-|------|------|--------|
-| 6.3.1 | 세션 관리 | `auth/session.go.tmpl` |
-| 6.3.2 | JWT 유틸리티 | `auth/jwt.go.tmpl` |
-| 6.3.3 | 미들웨어 | `middleware/auth.go.tmpl` |
+| Step | Task | 산출물 | 상태 |
+|------|------|--------|------|
+| 6.3.1 | 세션 관리 | `auth/session.go.tmpl` | ✅ |
+| 6.3.2 | JWT 유틸리티 | `auth/jwt.go.tmpl` | ✅ |
+| 6.3.3 | 미들웨어 | `auth/middleware.go.tmpl` | ✅ |
+
+**완료 기준**:
+- [x] gRPC: proto 파일, buf 설정, 서버 템플릿 생성
+- [x] AI: LLM 클라이언트 인터페이스 (OpenAI, Anthropic, Ollama 지원)
+- [x] AI: 프롬프트 템플릿 매니저 및 SSE 스트리밍 핸들러
+- [x] Auth: JWT 토큰 관리 (access/refresh 토큰 페어)
+- [x] Auth: 세션 관리 (인메모리 스토어, 플러거블 인터페이스)
+- [x] Auth: Gin 미들웨어 (JWTAuthMiddleware, SessionAuthMiddleware, RequireRole)
 
 ---
 
@@ -690,6 +697,7 @@ require (
 
 | Version | Date | Changes | Author |
 |---------|------|---------|--------|
+| 2.6.0 | 2025-12-01 | Phase 6 완료: Optional Features (gRPC, AI, Auth) 구현. proto/buf 설정, LLM 클라이언트, 프롬프트 매니저, SSE 스트리밍, JWT/세션 관리, Gin 미들웨어 | AI Assistant |
 | 2.5.0 | 2025-12-01 | Phase 4/5 완료: Database Integration (sqlc CRUD) 및 Frontend Integration (templ, htmx, Alpine.js, Tailwind) 검증 완료 | AI Assistant |
 | 2.4.0 | 2025-12-01 | Phase 3 완료: Hot Reload Pipeline 검증 완료, .air.toml pre_cmd 버그 수정 | AI Assistant |
 | 2.3.0 | 2025-11-30 | Phase 2 완료 검증: templ generate 자동화 추가, 모든 DB 옵션 빌드 테스트 통과 | AI Assistant |

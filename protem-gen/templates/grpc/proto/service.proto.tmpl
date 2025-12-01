@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package {{.Name | ToSnakeCase}}.v1;
+
+option go_package = "{{.ModulePath}}/internal/interfaces/grpc/pb";
+
+// HealthService provides health check functionality
+service HealthService {
+  // Check performs a health check
+  rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+message HealthCheckRequest {
+  string service = 1;
+}
+
+message HealthCheckResponse {
+  enum ServingStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+  }
+  ServingStatus status = 1;
+}
+
+// ExampleService demonstrates a basic gRPC service
+service ExampleService {
+  // GetExample retrieves an example by ID
+  rpc GetExample(GetExampleRequest) returns (GetExampleResponse);
+
+  // ListExamples retrieves all examples
+  rpc ListExamples(ListExamplesRequest) returns (ListExamplesResponse);
+
+  // CreateExample creates a new example
+  rpc CreateExample(CreateExampleRequest) returns (CreateExampleResponse);
+}
+
+message Example {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  string created_at = 4;
+}
+
+message GetExampleRequest {
+  int64 id = 1;
+}
+
+message GetExampleResponse {
+  Example example = 1;
+}
+
+message ListExamplesRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message ListExamplesResponse {
+  repeated Example examples = 1;
+  string next_page_token = 2;
+}
+
+message CreateExampleRequest {
+  string name = 1;
+  string description = 2;
+}
+
+message CreateExampleResponse {
+  Example example = 1;
+}

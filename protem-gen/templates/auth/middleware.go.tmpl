@@ -1,0 +1,202 @@
+package auth
+
+import (
+	"net/http"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+)
+
+const (
+	// AuthorizationHeader is the header key for the token
+	AuthorizationHeader = "Authorization"
+	// BearerSchema is the authorization schema prefix
+	BearerSchema = "Bearer "
+	// UserContextKey is the key for storing user info in context
+	UserContextKey = "user"
+	// SessionCookieName is the name of the session cookie
+	SessionCookieName = "session_id"
+)
+
+// UserContext represents the authenticated user context
+type UserContext struct {
+	UserID int64  `json:"user_id"`
+	Email  string `json:"email"`
+	Role   string `json:"role"`
+}
+
+// JWTAuthMiddleware creates a JWT authentication middleware
+func JWTAuthMiddleware(jwtManager *JWTManager) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token := extractToken(c)
+		if token == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error": "authorization token required",
+			})
+			return
+		}
+
+		claims, err := jwtManager.ValidateToken(token)
+		if err != nil {
+			status := http.StatusUnauthorized
+			message := "invalid token"
+
+			if err == ErrExpiredToken {
+				message = "token has expired"
+			}
+
+			c.AbortWithStatusJSON(status, gin.H{
+				"error": message,
+			})
+			return
+		}
+
+		// Set user context
+		c.Set(UserContextKey, &UserContext{
+			UserID: claims.UserID,
+			Email:  claims.Email,
+			Role:   claims.Role,
+		})
+
+		c.Next()
+	}
+}
+
+// SessionAuthMiddleware creates a session-based authentication middleware
+func SessionAuthMiddleware(sessionManager *SessionManager) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		sessionID, err := c.Cookie(SessionCookieName)
+		if err != nil || sessionID == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error": "session required",
+			})
+			return
+		}
+
+		session, err := sessionManager.GetSession(sessionID)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error": "invalid or expired session",
+			})
+			return
+		}
+
+		// Set user context
+		c.Set(UserContextKey, &UserContext{
+			UserID: session.UserID,
+			Email:  session.Email,
+			Role:   session.Role,
+		})
+
+		c.Next()
+	}
+}
+
+// RequireRole creates a middleware that requires a specific role
+func RequireRole(roles ...string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user := GetUserFromContext(c)
+		if user == nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error": "authentication required",
+			})
+			return
+		}
+
+		for _, role := range roles {
+			if user.Role == role {
+				c.Next()
+				return
+			}
+		}
+
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+			"error": "insufficient permissions",
+		})
+	}
+}
+
+// OptionalAuth creates a middleware that optionally authenticates
+// It continues even if no token is provided, but sets user context if valid token exists
+func OptionalAuth(jwtManager *JWTManager) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token := extractToken(c)
+		if token == "" {
+			c.Next()
+			return
+		}
+
+		claims, err := jwtManager.ValidateToken(token)
+		if err == nil {
+			c.Set(UserContextKey, &UserContext{
+				UserID: claims.UserID,
+				Email:  claims.Email,
+				Role:   claims.Role,
+			})
+		}
+
+		c.Next()
+	}
+}
+
+// GetUserFromContext retrieves the user from the gin context
+func GetUserFromContext(c *gin.Context) *UserContext {
+	value, exists := c.Get(UserContextKey)
+	if !exists {
+		return nil
+	}
+
+	user, ok := value.(*UserContext)
+	if !ok {
+		return nil
+	}
+
+	return user
+}
+
+// extractToken extracts the JWT token from the request
+func extractToken(c *gin.Context) string {
+	// Check Authorization header first
+	authHeader := c.GetHeader(AuthorizationHeader)
+	if authHeader != "" && strings.HasPrefix(authHeader, BearerSchema) {
+		return strings.TrimPrefix(authHeader, BearerSchema)
+	}
+
+	// Check query parameter as fallback
+	if token := c.Query("token"); token != "" {
+		return token
+	}
+
+	// Check cookie as fallback
+	if token, err := c.Cookie("access_token"); err == nil && token != "" {
+		return token
+	}
+
+	return ""
+}
+
+// SetSessionCookie sets the session cookie
+func SetSessionCookie(c *gin.Context, sessionID string, maxAge int, secure bool) {
+	c.SetCookie(
+		SessionCookieName,
+		sessionID,
+		maxAge,
+		"/",
+		"",
+		secure,
+		true, // httpOnly
+	)
+}
+
+// ClearSessionCookie clears the session cookie
+func ClearSessionCookie(c *gin.Context) {
+	c.SetCookie(
+		SessionCookieName,
+		"",
+		-1,
+		"/",
+		"",
+		false,
+		true,
+	)
+}

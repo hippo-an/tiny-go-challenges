@@ -1,0 +1,183 @@
+package stream
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"sync"
+
+	"{{.ModulePath}}/internal/infrastructure/llm"
+)
+
+// Handler handles streaming responses
+type Handler struct {
+	client llm.Client
+}
+
+// NewHandler creates a new streaming handler
+func NewHandler(client llm.Client) *Handler {
+	return &Handler{client: client}
+}
+
+// SSEWriter writes Server-Sent Events
+type SSEWriter struct {
+	w       http.ResponseWriter
+	flusher http.Flusher
+	mu      sync.Mutex
+}
+
+// NewSSEWriter creates a new SSE writer
+func NewSSEWriter(w http.ResponseWriter) (*SSEWriter, error) {
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		return nil, fmt.Errorf("streaming not supported")
+	}
+
+	// Set SSE headers
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	return &SSEWriter{
+		w:       w,
+		flusher: flusher,
+	}, nil
+}
+
+// WriteEvent writes an SSE event
+func (s *SSEWriter) WriteEvent(event, data string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if event != "" {
+		if _, err := fmt.Fprintf(s.w, "event: %s\n", event); err != nil {
+			return err
+		}
+	}
+	if _, err := fmt.Fprintf(s.w, "data: %s\n\n", data); err != nil {
+		return err
+	}
+	s.flusher.Flush()
+	return nil
+}
+
+// WriteJSON writes a JSON object as an SSE event
+func (s *SSEWriter) WriteJSON(event string, data interface{}) error {
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	return s.WriteEvent(event, string(jsonData))
+}
+
+// StreamEvent represents a streaming event
+type StreamEvent struct {
+	Type    string `json:"type"`
+	Content string `json:"content,omitempty"`
+	Error   string `json:"error,omitempty"`
+	Done    bool   `json:"done"`
+}
+
+// StreamCompletion handles a streaming completion request
+func (h *Handler) StreamCompletion(ctx context.Context, w http.ResponseWriter, req *llm.CompletionRequest) error {
+	sse, err := NewSSEWriter(w)
+	if err != nil {
+		return err
+	}
+
+	// Enable streaming in the request
+	req.Stream = true
+
+	// Get streaming channel
+	chunks, err := h.client.CompleteStream(ctx, req)
+	if err != nil {
+		sse.WriteJSON("error", StreamEvent{
+			Type:  "error",
+			Error: err.Error(),
+			Done:  true,
+		})
+		return err
+	}
+
+	// Stream chunks to client
+	for chunk := range chunks {
+		event := StreamEvent{
+			Type:    "content",
+			Content: chunk.Content,
+			Done:    chunk.Done,
+		}
+
+		if err := sse.WriteJSON("message", event); err != nil {
+			return err
+		}
+
+		if chunk.Done {
+			break
+		}
+	}
+
+	// Send done event
+	return sse.WriteJSON("done", StreamEvent{
+		Type: "done",
+		Done: true,
+	})
+}
+
+// ChatRequest represents a chat request from the client
+type ChatRequest struct {
+	Messages    []llm.Message `json:"messages"`
+	Model       string        `json:"model,omitempty"`
+	MaxTokens   int           `json:"max_tokens,omitempty"`
+	Temperature float64       `json:"temperature,omitempty"`
+	Stream      bool          `json:"stream,omitempty"`
+}
+
+// ChatResponse represents a chat response
+type ChatResponse struct {
+	Content string    `json:"content"`
+	Usage   llm.Usage `json:"usage,omitempty"`
+}
+
+// HandleChat handles a chat request (non-streaming)
+func (h *Handler) HandleChat(ctx context.Context, req *ChatRequest) (*ChatResponse, error) {
+	completionReq := &llm.CompletionRequest{
+		Model:       req.Model,
+		Messages:    req.Messages,
+		MaxTokens:   req.MaxTokens,
+		Temperature: req.Temperature,
+		Stream:      false,
+	}
+
+	resp, err := h.client.Complete(ctx, completionReq)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ChatResponse{
+		Content: resp.Content,
+		Usage:   resp.Usage,
+	}, nil
+}
+
+// HandleStreamChat handles a streaming chat request
+func (h *Handler) HandleStreamChat(w http.ResponseWriter, r *http.Request) {
+	var req ChatRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	completionReq := &llm.CompletionRequest{
+		Model:       req.Model,
+		Messages:    req.Messages,
+		MaxTokens:   req.MaxTokens,
+		Temperature: req.Temperature,
+	}
+
+	if err := h.StreamCompletion(r.Context(), w, completionReq); err != nil {
+		// Error already sent via SSE
+		return
+	}
+}

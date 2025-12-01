@@ -1,0 +1,227 @@
+package auth
+
+import (
+	"crypto/rand"
+	"encoding/base64"
+	"errors"
+	"sync"
+	"time"
+)
+
+var (
+	ErrSessionNotFound = errors.New("session not found")
+	ErrSessionExpired  = errors.New("session expired")
+)
+
+// Session represents a user session
+type Session struct {
+	ID        string
+	UserID    int64
+	Email     string
+	Role      string
+	Data      map[string]interface{}
+	CreatedAt time.Time
+	ExpiresAt time.Time
+}
+
+// IsExpired checks if the session has expired
+func (s *Session) IsExpired() bool {
+	return time.Now().After(s.ExpiresAt)
+}
+
+// SessionStore defines the interface for session storage
+type SessionStore interface {
+	Create(session *Session) error
+	Get(id string) (*Session, error)
+	Update(session *Session) error
+	Delete(id string) error
+	DeleteByUserID(userID int64) error
+}
+
+// InMemorySessionStore implements SessionStore with in-memory storage
+// Note: Use Redis or database for production
+type InMemorySessionStore struct {
+	sessions map[string]*Session
+	mu       sync.RWMutex
+}
+
+// NewInMemorySessionStore creates a new in-memory session store
+func NewInMemorySessionStore() *InMemorySessionStore {
+	store := &InMemorySessionStore{
+		sessions: make(map[string]*Session),
+	}
+	// Start cleanup goroutine
+	go store.cleanup()
+	return store
+}
+
+func (s *InMemorySessionStore) Create(session *Session) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.sessions[session.ID] = session
+	return nil
+}
+
+func (s *InMemorySessionStore) Get(id string) (*Session, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	session, ok := s.sessions[id]
+	if !ok {
+		return nil, ErrSessionNotFound
+	}
+
+	if session.IsExpired() {
+		return nil, ErrSessionExpired
+	}
+
+	return session, nil
+}
+
+func (s *InMemorySessionStore) Update(session *Session) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if _, ok := s.sessions[session.ID]; !ok {
+		return ErrSessionNotFound
+	}
+
+	s.sessions[session.ID] = session
+	return nil
+}
+
+func (s *InMemorySessionStore) Delete(id string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.sessions, id)
+	return nil
+}
+
+func (s *InMemorySessionStore) DeleteByUserID(userID int64) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for id, session := range s.sessions {
+		if session.UserID == userID {
+			delete(s.sessions, id)
+		}
+	}
+	return nil
+}
+
+// cleanup removes expired sessions periodically
+func (s *InMemorySessionStore) cleanup() {
+	ticker := time.NewTicker(5 * time.Minute)
+	for range ticker.C {
+		s.mu.Lock()
+		for id, session := range s.sessions {
+			if session.IsExpired() {
+				delete(s.sessions, id)
+			}
+		}
+		s.mu.Unlock()
+	}
+}
+
+// SessionManager manages user sessions
+type SessionManager struct {
+	store    SessionStore
+	duration time.Duration
+}
+
+// NewSessionManager creates a new session manager
+func NewSessionManager(store SessionStore, duration time.Duration) *SessionManager {
+	return &SessionManager{
+		store:    store,
+		duration: duration,
+	}
+}
+
+// CreateSession creates a new session for a user
+func (m *SessionManager) CreateSession(userID int64, email, role string) (*Session, error) {
+	id, err := generateSessionID()
+	if err != nil {
+		return nil, err
+	}
+
+	now := time.Now()
+	session := &Session{
+		ID:        id,
+		UserID:    userID,
+		Email:     email,
+		Role:      role,
+		Data:      make(map[string]interface{}),
+		CreatedAt: now,
+		ExpiresAt: now.Add(m.duration),
+	}
+
+	if err := m.store.Create(session); err != nil {
+		return nil, err
+	}
+
+	return session, nil
+}
+
+// GetSession retrieves a session by ID
+func (m *SessionManager) GetSession(id string) (*Session, error) {
+	return m.store.Get(id)
+}
+
+// RefreshSession extends the session expiry
+func (m *SessionManager) RefreshSession(id string) (*Session, error) {
+	session, err := m.store.Get(id)
+	if err != nil {
+		return nil, err
+	}
+
+	session.ExpiresAt = time.Now().Add(m.duration)
+	if err := m.store.Update(session); err != nil {
+		return nil, err
+	}
+
+	return session, nil
+}
+
+// DestroySession removes a session
+func (m *SessionManager) DestroySession(id string) error {
+	return m.store.Delete(id)
+}
+
+// DestroyUserSessions removes all sessions for a user
+func (m *SessionManager) DestroyUserSessions(userID int64) error {
+	return m.store.DeleteByUserID(userID)
+}
+
+// SetSessionData sets custom data in the session
+func (m *SessionManager) SetSessionData(id, key string, value interface{}) error {
+	session, err := m.store.Get(id)
+	if err != nil {
+		return err
+	}
+
+	session.Data[key] = value
+	return m.store.Update(session)
+}
+
+// GetSessionData retrieves custom data from the session
+func (m *SessionManager) GetSessionData(id, key string) (interface{}, error) {
+	session, err := m.store.Get(id)
+	if err != nil {
+		return nil, err
+	}
+
+	value, ok := session.Data[key]
+	if !ok {
+		return nil, nil
+	}
+	return value, nil
+}
+
+// generateSessionID generates a cryptographically secure session ID
+func generateSessionID() (string, error) {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(b), nil
+}

@@ -1,0 +1,116 @@
+package grpc
+
+import (
+	"fmt"
+	"log"
+	"net"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+)
+
+// NOTE: Run 'make proto-generate' first to generate the pb package
+// Then uncomment the imports and service registrations below.
+//
+// import pb "{{.ModulePath}}/internal/interfaces/grpc/pb"
+
+// Server represents the gRPC server
+type Server struct {
+	grpcServer *grpc.Server
+	port       int
+}
+
+// NewServer creates a new gRPC server
+func NewServer(port int) *Server {
+	grpcServer := grpc.NewServer()
+
+	// TODO: After running 'make proto-generate', register your services:
+	//
+	// healthService := &HealthServiceServer{}
+	// exampleService := &ExampleServiceServer{}
+	// pb.RegisterHealthServiceServer(grpcServer, healthService)
+	// pb.RegisterExampleServiceServer(grpcServer, exampleService)
+
+	// Enable reflection for development tools like grpcurl
+	reflection.Register(grpcServer)
+
+	return &Server{
+		grpcServer: grpcServer,
+		port:       port,
+	}
+}
+
+// Start starts the gRPC server
+func (s *Server) Start() error {
+	addr := fmt.Sprintf(":%d", s.port)
+	lis, err := net.Listen("tcp", addr)
+	if err != nil {
+		return fmt.Errorf("failed to listen on %s: %w", addr, err)
+	}
+
+	log.Printf("gRPC server listening on %s", addr)
+	return s.grpcServer.Serve(lis)
+}
+
+// Stop gracefully stops the gRPC server
+func (s *Server) Stop() {
+	s.grpcServer.GracefulStop()
+}
+
+// TODO: After running 'make proto-generate', uncomment and implement the service servers:
+//
+// // HealthServiceServer implements the HealthService
+// type HealthServiceServer struct {
+// 	pb.UnimplementedHealthServiceServer
+// }
+//
+// // Check implements the health check RPC
+// func (s *HealthServiceServer) Check(ctx context.Context, req *pb.HealthCheckRequest) (*pb.HealthCheckResponse, error) {
+// 	return &pb.HealthCheckResponse{
+// 		Status: pb.HealthCheckResponse_SERVING,
+// 	}, nil
+// }
+//
+// // ExampleServiceServer implements the ExampleService
+// type ExampleServiceServer struct {
+// 	pb.UnimplementedExampleServiceServer
+// }
+//
+// // GetExample implements the GetExample RPC
+// func (s *ExampleServiceServer) GetExample(ctx context.Context, req *pb.GetExampleRequest) (*pb.GetExampleResponse, error) {
+// 	return &pb.GetExampleResponse{
+// 		Example: &pb.Example{
+// 			Id:          req.Id,
+// 			Name:        "Example",
+// 			Description: "This is an example",
+// 			CreatedAt:   "2024-01-01T00:00:00Z",
+// 		},
+// 	}, nil
+// }
+//
+// // ListExamples implements the ListExamples RPC
+// func (s *ExampleServiceServer) ListExamples(ctx context.Context, req *pb.ListExamplesRequest) (*pb.ListExamplesResponse, error) {
+// 	return &pb.ListExamplesResponse{
+// 		Examples: []*pb.Example{
+// 			{
+// 				Id:          1,
+// 				Name:        "Example 1",
+// 				Description: "First example",
+// 				CreatedAt:   "2024-01-01T00:00:00Z",
+// 			},
+// 		},
+// 		NextPageToken: "",
+// 	}, nil
+// }
+//
+// // CreateExample implements the CreateExample RPC
+// func (s *ExampleServiceServer) CreateExample(ctx context.Context, req *pb.CreateExampleRequest) (*pb.CreateExampleResponse, error) {
+// 	return &pb.CreateExampleResponse{
+// 		Example: &pb.Example{
+// 			Id:          1,
+// 			Name:        req.Name,
+// 			Description: req.Description,
+// 			CreatedAt:   "2024-01-01T00:00:00Z",
+// 		},
+// 	}, nil
+// }

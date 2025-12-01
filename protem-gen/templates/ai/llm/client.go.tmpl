@@ -1,0 +1,212 @@
+package llm
+
+import (
+	"context"
+	"io"
+)
+
+// Message represents a chat message
+type Message struct {
+	Role    string `json:"role"`    // "system", "user", "assistant"
+	Content string `json:"content"`
+}
+
+// CompletionRequest represents a request for text completion
+type CompletionRequest struct {
+	Model       string    `json:"model"`
+	Messages    []Message `json:"messages"`
+	MaxTokens   int       `json:"max_tokens,omitempty"`
+	Temperature float64   `json:"temperature,omitempty"`
+	Stream      bool      `json:"stream,omitempty"`
+}
+
+// CompletionResponse represents a response from text completion
+type CompletionResponse struct {
+	ID      string `json:"id"`
+	Model   string `json:"model"`
+	Content string `json:"content"`
+	Usage   Usage  `json:"usage"`
+}
+
+// Usage represents token usage information
+type Usage struct {
+	PromptTokens     int `json:"prompt_tokens"`
+	CompletionTokens int `json:"completion_tokens"`
+	TotalTokens      int `json:"total_tokens"`
+}
+
+// StreamChunk represents a chunk in a streaming response
+type StreamChunk struct {
+	Content string `json:"content"`
+	Done    bool   `json:"done"`
+}
+
+// Client defines the interface for LLM providers
+type Client interface {
+	// Complete generates a completion for the given request
+	Complete(ctx context.Context, req *CompletionRequest) (*CompletionResponse, error)
+
+	// CompleteStream generates a streaming completion
+	CompleteStream(ctx context.Context, req *CompletionRequest) (<-chan StreamChunk, error)
+
+	// Close releases any resources held by the client
+	Close() error
+}
+
+// Provider represents an LLM provider type
+type Provider string
+
+const (
+	ProviderOpenAI    Provider = "openai"
+	ProviderAnthropic Provider = "anthropic"
+	ProviderOllama    Provider = "ollama"
+)
+
+// Config holds configuration for an LLM client
+type Config struct {
+	Provider    Provider `json:"provider"`
+	APIKey      string   `json:"api_key"`
+	BaseURL     string   `json:"base_url,omitempty"`
+	Model       string   `json:"model"`
+	MaxTokens   int      `json:"max_tokens,omitempty"`
+	Temperature float64  `json:"temperature,omitempty"`
+}
+
+// NewClient creates a new LLM client based on the config
+func NewClient(cfg Config) (Client, error) {
+	switch cfg.Provider {
+	case ProviderOpenAI:
+		return NewOpenAIClient(cfg)
+	case ProviderAnthropic:
+		return NewAnthropicClient(cfg)
+	case ProviderOllama:
+		return NewOllamaClient(cfg)
+	default:
+		return NewOpenAIClient(cfg)
+	}
+}
+
+// OpenAIClient implements the Client interface for OpenAI
+type OpenAIClient struct {
+	config Config
+}
+
+// NewOpenAIClient creates a new OpenAI client
+func NewOpenAIClient(cfg Config) (*OpenAIClient, error) {
+	if cfg.BaseURL == "" {
+		cfg.BaseURL = "https://api.openai.com/v1"
+	}
+	if cfg.Model == "" {
+		cfg.Model = "gpt-4"
+	}
+	return &OpenAIClient{config: cfg}, nil
+}
+
+func (c *OpenAIClient) Complete(ctx context.Context, req *CompletionRequest) (*CompletionResponse, error) {
+	// TODO: Implement OpenAI API call
+	return &CompletionResponse{
+		ID:      "placeholder",
+		Model:   req.Model,
+		Content: "OpenAI implementation placeholder",
+	}, nil
+}
+
+func (c *OpenAIClient) CompleteStream(ctx context.Context, req *CompletionRequest) (<-chan StreamChunk, error) {
+	ch := make(chan StreamChunk)
+	go func() {
+		defer close(ch)
+		// TODO: Implement streaming
+		ch <- StreamChunk{Content: "Streaming placeholder", Done: true}
+	}()
+	return ch, nil
+}
+
+func (c *OpenAIClient) Close() error {
+	return nil
+}
+
+// AnthropicClient implements the Client interface for Anthropic
+type AnthropicClient struct {
+	config Config
+}
+
+// NewAnthropicClient creates a new Anthropic client
+func NewAnthropicClient(cfg Config) (*AnthropicClient, error) {
+	if cfg.BaseURL == "" {
+		cfg.BaseURL = "https://api.anthropic.com"
+	}
+	if cfg.Model == "" {
+		cfg.Model = "claude-3-sonnet-20240229"
+	}
+	return &AnthropicClient{config: cfg}, nil
+}
+
+func (c *AnthropicClient) Complete(ctx context.Context, req *CompletionRequest) (*CompletionResponse, error) {
+	// TODO: Implement Anthropic API call
+	return &CompletionResponse{
+		ID:      "placeholder",
+		Model:   req.Model,
+		Content: "Anthropic implementation placeholder",
+	}, nil
+}
+
+func (c *AnthropicClient) CompleteStream(ctx context.Context, req *CompletionRequest) (<-chan StreamChunk, error) {
+	ch := make(chan StreamChunk)
+	go func() {
+		defer close(ch)
+		// TODO: Implement streaming
+		ch <- StreamChunk{Content: "Streaming placeholder", Done: true}
+	}()
+	return ch, nil
+}
+
+func (c *AnthropicClient) Close() error {
+	return nil
+}
+
+// OllamaClient implements the Client interface for Ollama (local)
+type OllamaClient struct {
+	config Config
+}
+
+// NewOllamaClient creates a new Ollama client
+func NewOllamaClient(cfg Config) (*OllamaClient, error) {
+	if cfg.BaseURL == "" {
+		cfg.BaseURL = "http://localhost:11434"
+	}
+	if cfg.Model == "" {
+		cfg.Model = "llama2"
+	}
+	return &OllamaClient{config: cfg}, nil
+}
+
+func (c *OllamaClient) Complete(ctx context.Context, req *CompletionRequest) (*CompletionResponse, error) {
+	// TODO: Implement Ollama API call
+	return &CompletionResponse{
+		ID:      "placeholder",
+		Model:   req.Model,
+		Content: "Ollama implementation placeholder",
+	}, nil
+}
+
+func (c *OllamaClient) CompleteStream(ctx context.Context, req *CompletionRequest) (<-chan StreamChunk, error) {
+	ch := make(chan StreamChunk)
+	go func() {
+		defer close(ch)
+		// TODO: Implement streaming
+		ch <- StreamChunk{Content: "Streaming placeholder", Done: true}
+	}()
+	return ch, nil
+}
+
+func (c *OllamaClient) Close() error {
+	return nil
+}
+
+// Ensure interfaces are implemented
+var (
+	_ Client    = (*OpenAIClient)(nil)
+	_ Client    = (*AnthropicClient)(nil)
+	_ Client    = (*OllamaClient)(nil)
+	_ io.Closer = (*OpenAIClient)(nil)
+)

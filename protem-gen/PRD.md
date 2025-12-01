@@ -1,7 +1,7 @@
 # protem-gen: Product Requirements Document
 
-> **Version**: 2.5.0
-> **Status**: Implemented - Phase 5 Complete
+> **Version**: 2.6.0
+> **Status**: Implemented - Phase 6 Complete
 > **Last Updated**: 2025-12-01
 
 ---
