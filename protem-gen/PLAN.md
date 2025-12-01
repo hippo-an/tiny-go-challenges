@@ -2,9 +2,9 @@
 
 ## Implementation Plan
 
-> **Document Version**: 2.7.0
+> **Document Version**: 2.8.0
 > **Last Updated**: 2025-12-02
-> **Status**: Implemented - Phase 7 Complete
+> **Status**: Implemented - Phase 8 Complete (v1.0 Ready)
 
 ---
 
@@ -537,16 +537,24 @@ web/
 ---
 
 ### Phase 8: Release & Distribution
-**목표**: 배포 준비
+**목표**: 배포 준비 (로컬 빌드 방식)
 
 #### 8.1 배포 전략
 
-| Step | Task | 산출물 |
-|------|------|--------|
-| 8.1.1 | GoReleaser 설정 | `.goreleaser.yml` |
-| 8.1.2 | GitHub Actions CI/CD | `.github/workflows/` |
-| 8.1.3 | 버전 관리 | 시맨틱 버저닝 |
-| 8.1.4 | Homebrew Formula | homebrew-tap (선택적) |
+| Step | Task | 산출물 | 상태 |
+|------|------|--------|------|
+| 8.1.1 | GitHub Actions CI | `.github/workflows/ci.yml` | ✅ |
+| 8.1.2 | Makefile 빌드/설치 | `Makefile` | ✅ |
+| 8.1.3 | 버전 관리 (ldflags) | `internal/cli/version.go` | ✅ |
+| 8.1.4 | README 실행 가이드 | `README.md` 업데이트 | ✅ |
+
+> **Note**: 실제 릴리즈(GitHub Releases, Homebrew)는 하지 않고 로컬 빌드 방식 사용
+
+**완료 기준**:
+- [x] GitHub Actions에서 테스트 자동 실행 (Go 1.22, 1.23 / ubuntu, macos)
+- [x] `make build` / `make install` 동작
+- [x] `protem-gen version`에서 버전, 커밋, 빌드일자 출력
+- [x] README.md에 Build from Source 가이드 포함
 
 ---
 
@@ -698,6 +706,7 @@ require (
 
 | Version | Date | Changes | Author |
 |---------|------|---------|--------|
+| 2.8.0 | 2025-12-02 | Phase 8 완료: Release & Distribution. GitHub Actions CI, Makefile, 버전 관리 (ldflags), README 실행 가이드. v1.0 Ready. | AI Assistant |
 | 2.7.0 | 2025-12-02 | Phase 7 완료: Testing & Documentation. 단위 테스트 (config 100%, template 93.5%, executor 50.8%, generator 11.7%), E2E 스크립트, README.md | AI Assistant |
 | 2.6.0 | 2025-12-01 | Phase 6 완료: Optional Features (gRPC, AI, Auth) 구현. proto/buf 설정, LLM 클라이언트, 프롬프트 매니저, SSE 스트리밍, JWT/세션 관리, Gin 미들웨어 | AI Assistant |
 | 2.5.0 | 2025-12-01 | Phase 4/5 완료: Database Integration (sqlc CRUD) 및 Frontend Integration (templ, htmx, Alpine.js, Tailwind) 검증 완료 | AI Assistant |

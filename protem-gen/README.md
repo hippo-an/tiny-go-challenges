@@ -16,13 +16,23 @@ protem-gen은 Go + Tailwind CSS + templ + htmx 기반의 웹 애플리케이션 
 
 ## Installation
 
+### Build from Source
+
 ```bash
-go install github.com/hippo-an/tiny-go-challenges/protem-gen@latest
+# 1. 저장소 클론
+git clone https://github.com/hippo-an/tiny-go-challenges.git
+cd tiny-go-challenges/protem-gen
+
+# 2. 빌드 및 설치
+make install
+
+# 3. 설치 확인
+protem-gen version
 ```
 
 ### Prerequisites
 
-다음 도구들이 설치되어 있어야 합니다:
+protem-gen 빌드 및 생성된 프로젝트 실행을 위해 다음 도구들이 필요합니다:
 
 | Tool | Installation |
 |------|--------------|
@@ -153,7 +163,19 @@ protem-gen version
 
 ## Development
 
-### Makefile Commands
+### protem-gen Makefile Commands
+
+protem-gen 개발 시 사용 가능한 명령어:
+
+| Command | Description |
+|---------|-------------|
+| `make build` | 로컬 바이너리 빌드 (`./bin/protem-gen`) |
+| `make install` | `$GOPATH/bin`에 설치 |
+| `make test` | 테스트 실행 |
+| `make test-coverage` | 커버리지 리포트 |
+| `make clean` | 빌드 결과물 삭제 |
+
+### Generated Project Makefile Commands
 
 생성된 프로젝트에서 사용 가능한 명령어:
 
