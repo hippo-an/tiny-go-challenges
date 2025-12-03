@@ -18,7 +18,7 @@ output "account_alias" {
 output "region_code" {
   value = split("-", data.aws_availability_zones.available.zone_ids[0])[0]
 }
-output "az_name" {
-  value = data.aws_availability_zones.available.name
+output "az_names" {
+  value = data.aws_availability_zones.available.names
 }
 
