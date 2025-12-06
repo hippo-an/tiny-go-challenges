@@ -1,0 +1,26 @@
+# tag
+env: production
+team: devops
+service: application
+os_type: linux
+
+# network
+subnet: pri-app
+az: a
+security_group:
+  - linux
+
+# instance
+ami_id: ami-0c55b159cbfafe1f0
+instance_type: t3.micro
+ec2_key: terraform-ec2-key
+ec2_role: etrraform-ec2-role
+
+# volume
+root_volume:
+  size: 20
+  type: gp3
+additional_volumes:
+  - device: /dev/sdf
+    size: 10
+    type: gp3
